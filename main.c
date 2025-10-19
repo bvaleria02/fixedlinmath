@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(){
+void creationAndBasiOperations(){
 	fixed32_t data[36];
 	flmmat_t mat;
 	FLMErrorCode code;
@@ -34,9 +34,13 @@ int main(){
 	fixedLMEye(&mat);
 	printf("Code: %i\n", fixedLMGetErrno(code));
 	fixedLMPrintMatrix(&mat);
+}
 
+void basic_arithmetic(){
+	FLMErrorCode code;
 	fixed32_t data1[9];
 	flmmat_t m1;
+
 	code = fixedLMCreateMatrix(&m1, 3, 3, FIXED32_T, data1);
 	fixedLMFill(&m1, 0x10000);
 	fixedLMPrintMatrix(&m1);
@@ -52,9 +56,53 @@ int main(){
 	code = fixedLMCreateMatrix(&m3, 3, 3, FIXED32_T, data3);
 
 	code = fixedLMAdd(&m1, &m2, &m3);
+	printf("Code: %i\n", code);
 	fixedLMPrintMatrix(&m3);
 
-	code = fixedLMSubScalar(&m3, NULL, FIXED32_T, 0x00008000);
+	code = fixedLMSubScalar(&m3, NULL, FIXED32_T, 0x00018000);
+	printf("Code: %i\n", code);
 	fixedLMPrintMatrix(&m3);
+
+	code = fixedLMMulScalar(&m3, NULL, FIXED32_T, 0x00020000);
+	printf("Code: %i\n", code);
+	fixedLMPrintMatrix(&m3);
+}
+
+void matmul_test(){
+	FLMErrorCode code;
+	flmmat_t m1, m2, m3;
+	fixed32_t data1[6];
+	fixed32_t data2[6];
+	fixed32_t data3[4];
+
+	code = fixedLMCreateMatrix(&m1, 3, 2, FIXED32_T, data1);
+	printf("Code: %i\n", code);
+	code = fixedLMCreateMatrix(&m2, 2, 3, FIXED32_T, data2);
+	printf("Code: %i\n", code);
+	code = fixedLMCreateMatrix(&m3, 2, 2, FIXED32_T, data3);
+	printf("Code: %i\n", code);
+
+	code = fixedLMOnes(&m1);
+	printf("Code: %i\n", code);
+	code = fixedLMSetValue(&m1, 1, 1, 0x0000);
+	fixedLMPrintMatrix(&m1);
+
+	code = fixedLMSetValue(&m2, 0, 0, 0x10000);
+	code = fixedLMSetValue(&m2, 1, 1, 0x10000);
+	code = fixedLMSetValue(&m2, 0, 2, 0x10000);
+	printf("Code: %i\n", code);
+	fixedLMPrintMatrix(&m2);
+
+	code = fixedLMMul(&m1, &m2, &m3);
+	printf("Code: %i\n", code);
+	fixedLMPrintMatrix(&m3);
+
+}
+
+
+int main(){
+	creationAndBasiOperations();
+	basic_arithmetic();
+	matmul_test();
 	return 0;
 }
