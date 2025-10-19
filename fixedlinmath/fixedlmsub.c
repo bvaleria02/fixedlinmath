@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-FLMErrorCode fixedLMAdd(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
+FLMErrorCode fixedLMSub(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 	if(m1 == NULL || m2 == NULL){
 		fixedLMSetErrno(FLM_ERROR_NULLPTR);
 		return FLM_ERROR_NULLPTR;
@@ -47,7 +47,7 @@ FLMErrorCode fixedLMAdd(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 			code = fixedLMGetErrno();
 			if(code != FLM_NO_ERROR) return code;
 
-			x3 = fixedAdd64(x1, x2);
+			x3 = fixedSub64(x1, x2);
 			x3 = typeAbstractValueConverterOut(m3->type, x3);
 
 			code = fixedLMSetValue(m3, j, i, x3);
@@ -60,7 +60,7 @@ FLMErrorCode fixedLMAdd(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 	return FLM_NO_ERROR;
 }
 
-FLMErrorCode fixedLMAddScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t value){
+FLMErrorCode fixedLMSubScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t value){
 	if(m1 == NULL){
 		fixedLMSetErrno(FLM_ERROR_NULLPTR);
 		return FLM_ERROR_NULLPTR;
@@ -100,7 +100,7 @@ FLMErrorCode fixedLMAddScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmret
 			code = fixedLMGetErrno();
 			if(code != FLM_NO_ERROR) return code;
 
-			x3 = fixedAdd64(x1, x2);
+			x3 = fixedSub64(x1, x2);
 			x3 = typeAbstractValueConverterOut(m2->type, x3);
 
 			code = fixedLMSetValue(m2, j, i, x3);

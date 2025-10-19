@@ -145,5 +145,15 @@ FLMErrorCode fixedLMEye(flmmat_t *mat);
 // fixedlinmath/fixedlmutils.c
 flmretrieve_t getZeroValueByType(flmtype_t type);
 flmretrieve_t getOneValueByType(flmtype_t type);
+flmretrieve_t typeAbstractValueConverterIn(flmtype_t type, flmretrieve_t x);
+flmretrieve_t typeAbstractValueConverterOut(flmtype_t type, flmretrieve_t x);
+
+// fixedlinmath/fixedlmadd.c
+FLMErrorCode fixedLMAdd(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
+FLMErrorCode fixedLMAddScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t value);
+
+// fixedlinmath/fixedlmsub.c
+FLMErrorCode fixedLMSub(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
+FLMErrorCode fixedLMSubScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t value);
 
 #endif // FIXED_LIN_MATH_H

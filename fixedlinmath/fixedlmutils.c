@@ -41,3 +41,38 @@ flmretrieve_t getZeroValueByType(flmtype_t type){
 
 	return oneVal;
 }
+
+
+flmretrieve_t typeAbstractValueConverterIn(flmtype_t type, flmretrieve_t x){
+	/*
+		converts from "type" to flmretrieve_t
+	*/
+	flmretrieve_t y;
+	
+	FLM_TYPE_EXEC_SPLIT(type, 
+		{ y = fixedLShift64((fixed64_t)  x, F32_RSHIFT); }, 
+		{ y = ufixedLShift64((ufixed64_t)x, F32_RSHIFT); },
+		{ y = (flmretrieve_t) x; },
+		{ y = (flmretrieve_t) x; },
+		{ y = 0; }
+	);
+
+	return y;
+}
+
+flmretrieve_t typeAbstractValueConverterOut(flmtype_t type, flmretrieve_t x){
+	/*
+		Converts from flmretrieve_t to "type"
+	*/
+	flmretrieve_t y;
+	
+	FLM_TYPE_EXEC_SPLIT(type, 
+		{ y = fixedRShift64((fixed64_t)  x, F32_RSHIFT); }, 
+		{ y = ufixedRShift64((ufixed64_t)x, F32_RSHIFT); },
+		{ y = (flmretrieve_t) x; },
+		{ y = (flmretrieve_t) x; },
+		{ y = 0; }
+	);
+
+	return y;
+}
