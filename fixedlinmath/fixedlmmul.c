@@ -121,3 +121,81 @@ FLMErrorCode fixedLMMulScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmret
 
 	return FLM_NO_ERROR;
 }
+
+FLMErrorCode fixedLMRowMul(flmmat_t *mat, flmdim_t row, flmtype_t type, flmretrieve_t value){
+	if(mat == NULL){
+		fixedLMSetErrno(FLM_ERROR_NULLPTR);
+		return FLM_ERROR_NULLPTR;
+	}
+
+	if(mat->isSet == FLM_MATRIX_UNSET){
+		fixedLMSetErrno(FLM_ERROR_MATRIXUNSET);
+		return FLM_ERROR_MATRIXUNSET;
+	}
+
+	if(row >= mat->height){
+		fixedLMSetErrno(FLM_ERROR_DIMENSION);
+		return FLM_ERROR_DIMENSION;
+	}
+
+	FLMErrorCode 	code;
+	flmretrieve_t 	temp1;
+	flmretrieve_t 	temp2;
+	flmretrieve_t 	x2 = typeAbstractValueConverterIn(type, value);
+	code  = fixedLMGetErrno();
+	if(code != FLM_NO_ERROR)	return code;
+
+	for(flmdim_t i = 0; i < mat->width; i++){
+		temp1 = fixedLMRetrieveValue(mat, i, row);
+		temp1 = typeAbstractValueConverterIn(mat->type, temp1);
+		code  = fixedLMGetErrno();
+		if(code != FLM_NO_ERROR)	return code;
+
+		temp2 = fixedMul64(temp1, x2);
+		temp2 = typeAbstractValueConverterOut(mat->type, temp2);
+
+		code = fixedLMSetValue(mat, i, row, temp2);
+		if(code != FLM_NO_ERROR)	return code;
+	}
+
+	return FLM_NO_ERROR;
+}
+
+FLMErrorCode fixedLMColMul(flmmat_t *mat, flmdim_t col, flmtype_t type, flmretrieve_t value){
+	if(mat == NULL){
+		fixedLMSetErrno(FLM_ERROR_NULLPTR);
+		return FLM_ERROR_NULLPTR;
+	}
+
+	if(mat->isSet == FLM_MATRIX_UNSET){
+		fixedLMSetErrno(FLM_ERROR_MATRIXUNSET);
+		return FLM_ERROR_MATRIXUNSET;
+	}
+
+	if(col >= mat->width){
+		fixedLMSetErrno(FLM_ERROR_DIMENSION);
+		return FLM_ERROR_DIMENSION;
+	}
+
+	FLMErrorCode 	code;
+	flmretrieve_t 	temp1;
+	flmretrieve_t 	temp2;
+	flmretrieve_t 	x2 = typeAbstractValueConverterIn(type, value);
+	code  = fixedLMGetErrno();
+	if(code != FLM_NO_ERROR)	return code;
+
+	for(flmdim_t i = 0; i < mat->height; i++){
+		temp1 = fixedLMRetrieveValue(mat, col, i);
+		temp1 = typeAbstractValueConverterIn(mat->type, temp1);
+		code  = fixedLMGetErrno();
+		if(code != FLM_NO_ERROR)	return code;
+
+		temp2 = fixedMul64(temp1, x2);
+		temp2 = typeAbstractValueConverterOut(mat->type, temp2);
+
+		code = fixedLMSetValue(mat, col, i, temp2);
+		if(code != FLM_NO_ERROR)	return code;
+	}
+
+	return FLM_NO_ERROR;
+}

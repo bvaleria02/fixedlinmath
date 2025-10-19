@@ -151,13 +151,23 @@ flmretrieve_t typeAbstractValueConverterOut(flmtype_t type, flmretrieve_t x);
 // fixedlinmath/fixedlmadd.c
 FLMErrorCode fixedLMAdd(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
 FLMErrorCode fixedLMAddScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t value);
+FLMErrorCode fixedLMRowAdd(flmmat_t *mat, flmdim_t rowSrc, flmdim_t rowDest);
+FLMErrorCode fixedLMColAdd(flmmat_t *mat, flmdim_t colSrc, flmdim_t colDest);
 
 // fixedlinmath/fixedlmsub.c
 FLMErrorCode fixedLMSub(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
 FLMErrorCode fixedLMSubScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t value);
+FLMErrorCode fixedLMRowSub(flmmat_t *mat, flmdim_t rowSrc, flmdim_t rowDest);
+FLMErrorCode fixedLMColSub(flmmat_t *mat, flmdim_t colSrc, flmdim_t colDest);
 
 // fixedlinmath/fixedlmmul.c
 FLMErrorCode fixedLMMul(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
 FLMErrorCode fixedLMMulScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t value);
+FLMErrorCode fixedLMRowMul(flmmat_t *mat, flmdim_t row, flmtype_t type, flmretrieve_t value);
+FLMErrorCode fixedLMColMul(flmmat_t *mat, flmdim_t col, flmtype_t type, flmretrieve_t value);
+
+// fixedlinmath/fixedrowcolmove.c
+FLMErrorCode fixedLMRowSwap(flmmat_t *mat, flmdim_t rowSrc, flmdim_t rowDest);
+FLMErrorCode fixedLMColSwap(flmmat_t *mat, flmdim_t colSrc, flmdim_t colDest);
 
 #endif // FIXED_LIN_MATH_H

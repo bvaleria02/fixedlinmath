@@ -87,11 +87,29 @@ void matmul_test(){
 	code = fixedLMSetValue(&m1, 1, 1, 0x0000);
 	fixedLMPrintMatrix(&m1);
 
+	code = fixedLMZeros(&m2);
 	code = fixedLMSetValue(&m2, 0, 0, 0x10000);
 	code = fixedLMSetValue(&m2, 1, 1, 0x10000);
 	code = fixedLMSetValue(&m2, 0, 2, 0x10000);
 	printf("Code: %i\n", code);
 	fixedLMPrintMatrix(&m2);
+
+	code = fixedLMRowSwap(&m2, 1, 2);
+	printf("Code: %i\n", code);
+	fixedLMPrintMatrix(&m2);
+
+	code = fixedLMColSwap(&m2, 0, 1);
+	printf("Code: %i\n", code);
+	fixedLMPrintMatrix(&m2);
+
+	code = fixedLMColMul(&m2, 1, FIXED32_T, 0x40000);
+	printf("Code: %i\n", code);
+	fixedLMPrintMatrix(&m2);
+
+	code = fixedLMColSub(&m2, 1, 0);
+	printf("Code: %i\n", code);
+	fixedLMPrintMatrix(&m2);
+
 
 	code = fixedLMMul(&m1, &m2, &m3);
 	printf("Code: %i\n", code);
