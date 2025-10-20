@@ -76,3 +76,38 @@ flmretrieve_t typeAbstractValueConverterOut(flmtype_t type, flmretrieve_t x){
 
 	return y;
 }
+
+flmretrieve_t getReciprocalByType(flmtype_t type, flmretrieve_t x){
+	flmretrieve_t y;
+
+	FLM_TYPE_EXEC_SPLIT(type, 
+		{ y = fixedRecp32(x); },
+		{ y = ufixedRecp32(x); },
+		{ y = fixedRecp64(x); },
+		{ y = ufixedRecp64(x); },
+		{ return FLM_ERROR_VALUE; }
+	);
+
+	return y;
+}
+
+flmdim_t getNonZeroRowFromColumn(flmmat_t *mat, flmdim_t col){
+	if(mat == NULL){
+		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_ERROR_VALUE);
+	}
+
+	if(col >= mat->width){
+		FLM_RAISE_RETURN_VALUE(FLM_ERROR_DIMENSION, FLM_ERROR_VALUE);
+	}
+
+	flmretrieve_t temp1;
+
+	for(flmdim_t i = 0; i < mat->height; i++){
+		temp1 = fixedLMRetrieveValue(mat, col, i);
+		if(temp1 != 0){
+			return i;
+		}
+	}
+
+	FLM_RAISE_RETURN_VALUE(FLM_ERROR_NOTFOUND, FLM_ERROR_VALUE);
+}
