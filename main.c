@@ -140,28 +140,41 @@ void matmul_test(){
 }
 
 void gaussJordan(){
-	fixed32_t data1[9];
-	fixed32_t data2[9];
+	fixed32_t data1[FLM_BUFFER_CAPACITY(3, 3)];
 	flmmat_t m1, m2;
 	FLMErrorCode code;
 
 	code = fixedLMCreateMatrix(&m1, 3, 3, FIXED32_T, data1);
 	printf("Code: %i\n", code);
-	code = fixedLMCreateMatrix(&m2, 3, 3, FIXED32_T, data2);
+	code = fixedLMAllocMatrix(&m2, 1, 3, FIXED32_T);
 	printf("Code: %i\n", code);
 
 	fixedLMZeros(&m1);
 	fixedLMZeros(&m2);
 
-	fixedLMSetValue(&m1, 2, 0, 0x20000);
-	fixedLMSetValue(&m1, 1, 1, 0x10000);
-	fixedLMSetValue(&m1, 0, 2, 0x08000);
-	fixedLMPrintMatrix(&m1);
+	fixedLMSetValue(&m1, 2, 0, 0x20000);	// 2.0
+	fixedLMSetValue(&m1, 1, 1, 0x08000);	// 0.5
+	fixedLMSetValue(&m1, 0, 2, 0x48000);	// 4.5
+	fixedLMSetValue(&m1, 0, 1, 0x40000);	// 4.0
+
+	//fixedLMEye(&m2);
+	fixedLMSetValue(&m2, 0, 0, 0x08000);	// 0.5
+	fixedLMSetValue(&m2, 0, 1, 0x74000);	// 7.25
+	fixedLMSetValue(&m2, 0, 2, 0x52000);	// 5.125
 
 	code = fixedLMGaussJordan(&m1, &m2);
-	printf("Code: %i\n", code);
+	fixedLMPrintError();
 	fixedLMPrintMatrix(&m1);
 	fixedLMPrintMatrix(&m2);
+
+	fixedLMDestroyMatrix(&m1);
+	fixedLMPrintError();
+	FLM_CLEAR_ERROR();
+
+	fixedLMDestroyMatrix(&m2);
+	fixedLMPrintError();
+	fixedLMPrintMatrix(&m2);
+	fixedLMPrintError();
 }
 
 int main(){
@@ -169,7 +182,7 @@ int main(){
 	creationAndBasiOperations();
 	basic_arithmetic();
 	*/
-	matmul_test();
-	//gaussJordan();
+//	matmul_test();
+	gaussJordan();
 	return 0;
 }

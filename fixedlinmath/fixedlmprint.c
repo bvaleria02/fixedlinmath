@@ -53,7 +53,9 @@ FLMErrnoString errnoStringConsts[FLMERRNOSTRING_SIZE] = {
 	"Expected square matrix (MxM), but rectangular was passed (MxN).",
 	"Expected value not found on current matrix.",
 	"The matrix isn't invertible.",
-	"Attempted a division by zero."
+	"Attempted a division by zero.",
+	"Error allocating heap memory (malloc)",
+	"The matrix data is static, not allocated in heap",
 };
 
 FLMErrnoString fixedLMGetErrnoString(FLMErrorCode code){
