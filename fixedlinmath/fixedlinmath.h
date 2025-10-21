@@ -244,8 +244,12 @@ FLMErrorCode fixedLMColDivScalar(flmmat_t *mat, flmdim_t col, flmtype_t type, fl
 // fixedlinmath/fixedrowcolmove.c
 FLMErrorCode fixedLMRowSwap(flmmat_t *mat, flmdim_t rowSrc, flmdim_t rowDest);
 FLMErrorCode fixedLMColSwap(flmmat_t *mat, flmdim_t colSrc, flmdim_t colDest);
+FLMErrorCode fixedLMValueSwap(flmmat_t *matSrc, flmmat_t *matDest, flmdim_t colSrc, flmdim_t rowSrc, flmdim_t colDest, flmdim_t rowDest);
 
 // fixedlinmath/fixedlmgaussjordan.c
 FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest);
+
+// fixedlinmath/fixedlmtraspose.c
+FLMErrorCode fixedLMTranspose(flmmat_t *mat);
 
 #endif // FIXED_LIN_MATH_H

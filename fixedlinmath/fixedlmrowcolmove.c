@@ -81,3 +81,44 @@ FLMErrorCode fixedLMColSwap(flmmat_t *mat, flmdim_t colSrc, flmdim_t colDest){
 
 	return FLM_NO_ERROR;
 }
+
+FLMErrorCode fixedLMValueSwap(flmmat_t *matSrc, flmmat_t *matDest, flmdim_t colSrc, flmdim_t rowSrc, flmdim_t colDest, flmdim_t rowDest){
+	if(matSrc == NULL){
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
+	}
+
+	if(matDest == NULL){
+		matDest = matSrc;
+	}
+
+	if(matSrc->isSet == FLM_MATRIX_UNSET || matDest->isSet == FLM_MATRIX_UNSET){
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
+	}
+
+	if(colSrc >= matSrc->width || colDest >= matDest->width){
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
+	}
+
+	if(rowSrc >= matSrc->height || rowDest >= matDest->height){
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
+	}
+
+	FLMErrorCode 	code;
+	flmretrieve_t 	temp1;
+	flmretrieve_t 	temp2;
+
+	temp1 = fixedLMRetrieveValue(matSrc,  colSrc,  rowSrc);
+	code  = fixedLMGetErrno();
+	if(code != FLM_NO_ERROR)	FLM_RAISE_RETURN_ERROR(code);
+
+	temp2 = fixedLMRetrieveValue(matDest, colDest, rowDest);
+	code  = fixedLMGetErrno();
+	if(code != FLM_NO_ERROR)	FLM_RAISE_RETURN_ERROR(code);
+		
+	code = fixedLMSetValue(matSrc,  colSrc,  rowSrc,  temp2);
+	if(code != FLM_NO_ERROR)	FLM_RAISE_RETURN_ERROR(code);
+	code = fixedLMSetValue(matDest, colDest, rowDest, temp1);
+	if(code != FLM_NO_ERROR)	FLM_RAISE_RETURN_ERROR(code);
+
+	return FLM_NO_ERROR;
+}

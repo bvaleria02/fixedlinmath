@@ -162,7 +162,7 @@ void gaussJordan(){
 	fixedLMSetValue(&m2, 0, 1, 0x74000);	// 7.25
 	fixedLMSetValue(&m2, 0, 2, 0x52000);	// 5.125
 
-	code = fixedLMGaussJordan(&m1, &m2);
+//	code = fixedLMGaussJordan(&m1, &m2);
 	fixedLMPrintError();
 	fixedLMPrintMatrix(&m1);
 	fixedLMPrintMatrix(&m2);
@@ -171,11 +171,25 @@ void gaussJordan(){
 	fixedLMPrintError();
 	FLM_CLEAR_ERROR();
 
+/*
 	fixedLMDestroyMatrix(&m2);
 	fixedLMPrintError();
 	fixedLMPrintMatrix(&m2);
 	fixedLMPrintError();
+*/
+	FLM_CLEAR_ERROR();
+
+	fixedLMTranspose(&m1);
+	fixedLMPrintMatrix(&m1);
+	fixedLMPrintError();
+
+	fixedLMTranspose(&m2);
+	fixedLMPrintMatrix(&m2);
+	fixedLMPrintError();
+
 }
+	
+
 
 int main(){
 	/*
