@@ -42,6 +42,7 @@ typedef enum {
 	FLM_ERROR_DIVZERO		= 9,
 	FLM_ERROR_MALLOC		= 10,
 	FLM_ERROR_NOTHEAPMEMORY = 11,
+	FLM_ERROR_NOTVECTOR		= 12,
 } FLMErrorCode;
 
 typedef enum{
@@ -70,8 +71,8 @@ extern _Thread_local FLMFunctionName flm_funcname;
 extern _Thread_local FLMFileName flm_filename;
 extern _Thread_local FLMLineNumber flm_linenumber;
 
-#define FLM_ERROR_VALUE 0
-#define FLM_DIM_ERROR 0
+#define FLM_ERROR_VALUE -1
+#define FLM_DIM_ERROR   ((flmdim_t) -1)
 
 #define FLM_BUFFER_CAPACITY(cols, rows) (cols * rows)
 
@@ -179,6 +180,7 @@ extern _Thread_local FLMLineNumber flm_linenumber;
 // fixedlinmath/creatematrix.c
 FLMErrorCode fixedLMCreateMatrix(flmmat_t *mat, flmdim_t width, flmdim_t height, flmtype_t type, void *data);
 FLMErrorCode fixedLMAllocMatrix(flmmat_t *mat, flmdim_t width, flmdim_t height, flmtype_t type);
+FLMErrorCode fixedLMResetMatrix(flmmat_t *mat);
 FLMErrorCode fixedLMDestroyMatrix(flmmat_t *mat);
 
 // fixedlinmath/access.c
@@ -251,5 +253,14 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest);
 
 // fixedlinmath/fixedlmtraspose.c
 FLMErrorCode fixedLMTranspose(flmmat_t *mat);
+
+// fixedlinmath/fixedlmdotproduct.c
+FLMErrorCode fixedLMDotElementWise(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
+FLMErrorCode fixedLMDotVectorRow(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t *value);
+FLMErrorCode fixedLMDotVectorCol(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t *value);
+
+// fixedlinmath/fixedlmcrossproduct.c
+FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
+FLMErrorCode fixedLMCrossCol3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
 
 #endif // FIXED_LIN_MATH_H

@@ -56,6 +56,7 @@ FLMErrnoString errnoStringConsts[FLMERRNOSTRING_SIZE] = {
 	"Attempted a division by zero.",
 	"Error allocating heap memory (malloc)",
 	"The matrix data is static, not allocated in heap",
+	"The matrix is not a vector (Nx1)",
 };
 
 FLMErrnoString fixedLMGetErrnoString(FLMErrorCode code){

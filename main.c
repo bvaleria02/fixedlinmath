@@ -189,7 +189,35 @@ void gaussJordan(){
 
 }
 	
+void dotCrossProduct(){
+	flmmat_t v1, v2, v3;
+	fixed32_t data1[3];
+	fixed32_t data2[3];
+	fixed32_t data3[3];
 
+	fixedLMCreateMatrix(&v1, 1, 3, FIXED32_T, data1);
+	fixedLMCreateMatrix(&v2, 1, 3, FIXED32_T, data2);
+	fixedLMCreateMatrix(&v3, 1, 3, FIXED32_T, data3);
+
+	fixedLMZeros(&v1);
+	fixedLMZeros(&v2);
+	fixedLMZeros(&v3);
+
+	fixedLMSetValue(&v1, 0, 0, 0x40000);	//  4.0
+	fixedLMSetValue(&v1, 0, 2, 0x20000);	//  2.0
+	fixedLMSetValue(&v2, 0, 0, 0xA0000);	// 10.0
+	fixedLMSetValue(&v2, 0, 1, 0x78000);	//  7.5
+
+	flmretrieve_t dot = 0;
+	fixedLMDotVectorCol(&v1, &v2, FIXED32_T, &dot);
+	printf("Dot product: %lf\n", convertF32ToDouble(dot));
+
+	fixedLMCrossCol3d(&v1, &v2, &v3);
+
+	fixedLMPrintMatrix(&v1);
+	fixedLMPrintMatrix(&v2);
+	fixedLMPrintMatrix(&v3);
+}
 
 int main(){
 	/*
@@ -197,6 +225,8 @@ int main(){
 	basic_arithmetic();
 	*/
 //	matmul_test();
-	gaussJordan();
+//	gaussJordan();
+
+	dotCrossProduct();
 	return 0;
 }
