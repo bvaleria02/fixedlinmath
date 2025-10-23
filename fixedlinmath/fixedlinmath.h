@@ -183,6 +183,34 @@ extern _Thread_local FLMLineNumber flm_linenumber;
 						break;								\
 	}
 
+#define HANDLE_INVALID_MATRIX(mat)	do{						\
+	if(mat == NULL){										\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);			\
+	}														\
+															\
+	if(mat->isSet == FLM_MATRIX_UNSET){						\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);		\
+	}														\
+} while(0)
+
+#define HANDLE_RECTANGLE_MATRIX(mat, width, height) do{		\
+	width = fixedLMGetWidth(mat);							\
+	height = fixedLMGetHeight(mat);							\
+															\
+	if(width != height){									\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_RECTANGULAR);		\
+	}														\
+} while(0)
+
+#define HANDLE_NONMATCHING_MATRIX(widthA, heightA, widthB, heightB) do{		\
+	if(widthA != widthB){									\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);		\
+	}														\
+															\
+	if(heightA != heightB){									\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);		\
+	}														\
+} while(0)
 
 // fixedlinmath/creatematrix.c
 FLMErrorCode fixedLMCreateMatrix(flmmat_t *mat, flmdim_t width, flmdim_t height, flmtype_t type, void *data);
@@ -273,5 +301,16 @@ FLMErrorCode fixedLMDotVectorCol(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flm
 // fixedlinmath/fixedlmcrossproduct.c
 FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
 FLMErrorCode fixedLMCrossCol3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);
+
+// fixedlinmath/fixedlmludecomp.c
+FLMErrorCode fixedLMLUDecomposition(flmmat_t *a, flmmat_t *l, flmmat_t *u);
+
+// fixedlinmath/fixedlmdeterminant.c
+FLMErrorCode fixedLMDeterminant(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmtype_t type, flmretrieve_t *value);
+FLMErrorCode fixedLMDeterminant0x0(flmmat_t *a, flmtype_t type, flmretrieve_t *value);
+FLMErrorCode fixedLMDeterminant1x1(flmmat_t *a, flmtype_t type, flmretrieve_t *value);
+FLMErrorCode fixedLMDeterminant2x2(flmmat_t *a, flmtype_t type, flmretrieve_t *value);
+FLMErrorCode fixedLMDeterminant3x3(flmmat_t *a, flmtype_t type, flmretrieve_t *value);
+FLMErrorCode fixedLMDeterminantLU(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmtype_t type, flmretrieve_t *value);
 
 #endif // FIXED_LIN_MATH_H

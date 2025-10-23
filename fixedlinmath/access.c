@@ -55,6 +55,7 @@ flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t col, flmdim_t row){
 
 	uint32_t element = getElementMatrix(mat, col, row);
 	flmretrieve_t value = 0;
+	//printf("trans: %i\tcol: %i\trow: %i\tIndex: %i\n", mat->isTransposed, col, row, element);
 
 	FLM_TYPE_EXEC(mat->type, {
 		value = ((flmdtype_t *)mat->data)[element];
@@ -83,7 +84,6 @@ FLMErrorCode fixedLMSetValue(flmmat_t *mat, flmdim_t col, flmdim_t row, flmretri
 	}
 
 	uint32_t element = getElementMatrix(mat, col, row);
-	printf("trans: %i\tcol: %i\trow: %i\tIndex: %i\n", mat->isTransposed, col, row, element);
 
 	FLM_TYPE_EXEC(mat->type, {
 		((flmdtype_t *)mat->data)[element] = (flmdtype_t)value;

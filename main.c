@@ -242,6 +242,40 @@ void virtualTranspose(){
 	fixedLMPrintMatrix(&m4);
 }
 
+void LUDecomp(){
+	fixed32_t dataA[9];
+	fixed32_t dataL[9];
+	fixed32_t dataU[9];
+	flmmat_t a, l, u;
+	
+	fixedLMCreateMatrix(&a, 3, 3, FIXED32_T, dataA);
+	fixedLMCreateMatrix(&l, 3, 3, FIXED32_T, dataL);
+	fixedLMCreateMatrix(&u, 3, 3, FIXED32_T, dataU);
+
+	fixedLMSetValue(&a, 0, 0, 0x20000);		//  2.0
+	fixedLMSetValue(&a, 1, 0, 0x00000);		//  0.0
+	fixedLMSetValue(&a, 2, 0, 0xFFFEFFFF);	// -1.0
+	fixedLMSetValue(&a, 0, 1, 0xFFFBFFFF);	// -4.0
+	fixedLMSetValue(&a, 1, 1, 0x20000);		//  2.0
+	fixedLMSetValue(&a, 2, 1, 0x00000);		//  0.0
+	fixedLMSetValue(&a, 0, 2, 0x00000);		//  0.0
+	fixedLMSetValue(&a, 1, 2, 0xFFFAFFFF);	// -5.0
+	fixedLMSetValue(&a, 2, 2, 0xFFFAFFFF);	// -5.0
+
+	fixedLMPrintMatrix(&a);
+
+	fixedLMLUDecomposition(&a, &l, &u);
+	fixedLMPrintMatrix(&a);
+	fixedLMPrintMatrix(&l);
+	fixedLMPrintMatrix(&u);
+
+	flmretrieve_t det;
+	fixedLMDeterminant3x3(&a, FIXED64_T, &det);
+	fixedLMDeterminant(&a, &l, &u, FIXED64_T, &det);
+	printf("Det: %lf\n", convertF64ToDouble(det));
+
+}
+
 int main(){
 	/*
 	creationAndBasiOperations();
@@ -250,7 +284,9 @@ int main(){
 //	matmul_test();
 //	gaussJordan();
 
-	dotCrossProduct();
-	virtualTranspose();
+	//dotCrossProduct();
+	//virtualTranspose();
+
+	LUDecomp();
 	return 0;
 }
