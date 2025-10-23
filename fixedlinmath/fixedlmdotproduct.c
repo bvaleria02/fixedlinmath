@@ -21,11 +21,18 @@ FLMErrorCode fixedLMDotElementWise(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if((m1->width != m2->width) || (m1->width != m3->width)){
+	flmdim_t height1 = fixedLMGetHeight(m1);
+	flmdim_t width1 = fixedLMGetWidth(m1);
+	flmdim_t height2 = fixedLMGetHeight(m2);
+	flmdim_t width2 = fixedLMGetWidth(m2);
+	flmdim_t height3 = fixedLMGetHeight(m3);
+	flmdim_t width3 = fixedLMGetWidth(m3);
+
+	if((width1 != width2) || (width1 != width3)){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if((m1->height != m2->height) || (m1->height != m3->height)){
+	if((height1 != height2) || (height1 != height3)){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
@@ -34,8 +41,8 @@ FLMErrorCode fixedLMDotElementWise(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 	flmretrieve_t temp2;
 	flmretrieve_t temp3;
 
-	for(flmdim_t i = 0; i < m1->height; i++){
-		for(flmdim_t j = 0; j < m1->width; j++){
+	for(flmdim_t i = 0; i < height1; i++){
+		for(flmdim_t j = 0; j < width1; j++){
 			FLM_CLEAR_ERROR();
 			temp1 = fixedLMRetrieveValue(m1, j, i);
 			temp1 = typeAbstractValueConverterIn(m1->type, temp1);
@@ -66,15 +73,20 @@ FLMErrorCode fixedLMDotVectorRow(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flm
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(m1->width != m2->width){
+	flmdim_t height1 = fixedLMGetHeight(m1);
+	flmdim_t width1 = fixedLMGetWidth(m1);
+	flmdim_t height2 = fixedLMGetHeight(m2);
+	flmdim_t width2 = fixedLMGetWidth(m2);
+
+	if(width1 != width2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->height != m2->height){
+	if(height1 != height2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->height != 1 || m2->height != 1){
+	if(height1 != 1 || height2 != 1){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);
 	}
 
@@ -84,7 +96,7 @@ FLMErrorCode fixedLMDotVectorRow(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flm
 	flmretrieve_t temp3;
 	flmretrieve_t acc   = 0;
 
-	for(flmdim_t i = 0; i < m1->width; i++){
+	for(flmdim_t i = 0; i < width1; i++){
 		FLM_CLEAR_ERROR();
 
 		temp1 = fixedLMRetrieveValue(m1, i, 0);
@@ -121,15 +133,20 @@ FLMErrorCode fixedLMDotVectorCol(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flm
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(m1->width != m2->width){
+	flmdim_t height1 = fixedLMGetHeight(m1);
+	flmdim_t width1 = fixedLMGetWidth(m1);
+	flmdim_t height2 = fixedLMGetHeight(m2);
+	flmdim_t width2 = fixedLMGetWidth(m2);
+
+	if(width1 != width2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->height != m2->height){
+	if(height1 != height2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->width != 1 || m2->width != 1){
+	if(width1 != 1 || width2 != 1){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);
 	}
 
@@ -139,7 +156,7 @@ FLMErrorCode fixedLMDotVectorCol(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flm
 	flmretrieve_t temp3;
 	flmretrieve_t acc   = 0;
 
-	for(flmdim_t i = 0; i < m1->height; i++){
+	for(flmdim_t i = 0; i < height1; i++){
 		FLM_CLEAR_ERROR();
 
 		temp1 = fixedLMRetrieveValue(m1, 0, i);

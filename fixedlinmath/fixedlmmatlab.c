@@ -13,10 +13,13 @@ FLMErrorCode fixedLMFill(flmmat_t *mat, flmretrieve_t value){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
+	flmdim_t height = fixedLMGetHeight(mat);
+	flmdim_t width = fixedLMGetWidth(mat);
+
 	FLMErrorCode code = FLM_NO_ERROR;
 
-	for(flmdim_t i = 0; i < mat->width; i++){
-		for(flmdim_t j = 0; j < mat->height; j++){
+	for(flmdim_t i = 0; i < width; i++){
+		for(flmdim_t j = 0; j < height; j++){
 			code = fixedLMSetValue(mat, i, j, value);
 			if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 		}
@@ -58,7 +61,10 @@ FLMErrorCode fixedLMEye(flmmat_t *mat){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(mat->width != mat->height){
+	flmdim_t height = fixedLMGetHeight(mat);
+	flmdim_t width = fixedLMGetWidth(mat);
+
+	if(width != height){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_RECTANGULAR);
 	}
 	
@@ -71,7 +77,7 @@ FLMErrorCode fixedLMEye(flmmat_t *mat){
 	code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 
-	for(flmdim_t i = 0; i < mat->width; i++){
+	for(flmdim_t i = 0; i < width; i++){
 		code = fixedLMSetValue(mat, i, i, oneVal);
 		if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 	}

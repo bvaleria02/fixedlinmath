@@ -203,10 +203,13 @@ void dotCrossProduct(){
 	fixedLMZeros(&v2);
 	fixedLMZeros(&v3);
 
+	v2.isTransposed = 1;
 	fixedLMSetValue(&v1, 0, 0, 0x40000);	//  4.0
 	fixedLMSetValue(&v1, 0, 2, 0x20000);	//  2.0
 	fixedLMSetValue(&v2, 0, 0, 0xA0000);	// 10.0
-	fixedLMSetValue(&v2, 0, 1, 0x78000);	//  7.5
+	fixedLMSetValue(&v2, 1, 0, 0x78000);	//  7.5
+	v2.isTransposed = 0;
+	fixedLMPrintError();
 
 	flmretrieve_t dot = 0;
 	fixedLMDotVectorCol(&v1, &v2, FIXED32_T, &dot);
@@ -217,6 +220,26 @@ void dotCrossProduct(){
 	fixedLMPrintMatrix(&v1);
 	fixedLMPrintMatrix(&v2);
 	fixedLMPrintMatrix(&v3);
+
+	fixedLMTransposeDeep(&v3);
+	fixedLMPrintMatrix(&v3);
+}
+
+void virtualTranspose(){
+	FLM_CLEAR_ERROR();
+	fixed32_t data4[6];
+	flmmat_t m4;
+	fixedLMCreateMatrix(&m4, 2, 3, FIXED32_T, data4);
+	
+	for(uint8_t i = 0; i < 6; i++){
+		fixedLMSetValue(&m4, i % 2, i / 2, 0x10000 * i);
+	}
+
+	fixedLMPrintMatrix(&m4);
+	fixedLMTransposeVirtual(&m4);
+	fixedLMRowSwap(&m4, 0, 1);
+	fixedLMPrintError();
+	fixedLMPrintMatrix(&m4);
 }
 
 int main(){
@@ -228,5 +251,6 @@ int main(){
 //	gaussJordan();
 
 	dotCrossProduct();
+	virtualTranspose();
 	return 0;
 }

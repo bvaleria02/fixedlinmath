@@ -18,12 +18,15 @@ void fixedLMPrintMatrix(flmmat_t *mat){
 	flmretrieve_t value;
 	double valueF;
 
-	printf("Columns: %i\tRows: %i\n", mat->width, mat->height);
+	flmdim_t height = fixedLMGetHeight(mat);
+	flmdim_t width = fixedLMGetWidth(mat);
 
-	for(flmdim_t i = 0; i < mat->height; i++){
+	printf("Columns: %i\tRows: %i\n",width, height);
+
+	for(flmdim_t i = 0; i < height; i++){
 		printf("Row: %i:\t", i+1);
 
-		for(flmdim_t j = 0; j < mat->width; j++){
+		for(flmdim_t j = 0; j < width; j++){
 			value = fixedLMRetrieveValue(mat, j, i);
 
 			FLM_TYPE_EXEC_SPLIT(mat->type, {

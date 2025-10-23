@@ -14,11 +14,15 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(msrc->height != mdest->height){
+	flmdim_t heightSrc = fixedLMGetHeight(msrc);
+	flmdim_t widthSrc = fixedLMGetWidth(msrc);
+	flmdim_t heightDest = fixedLMGetHeight(mdest);
+
+	if(heightSrc != heightDest){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(msrc->width != msrc->height){
+	if(widthSrc != heightSrc){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_RECTANGULAR);
 	}
 	
@@ -30,7 +34,7 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
 
 	flmdim_t rowWithoutZero;
 	
-	for(flmdim_t i = 0; i < msrc->width; i++){
+	for(flmdim_t i = 0; i < widthSrc; i++){
 		
 		fixedLMClearErrno();
 		rowWithoutZero = getNonZeroRowFromColumnIndex(msrc, i, i);
@@ -59,7 +63,7 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
 		// Ensures 1.0 value
 		fixedLMSetValue(msrc, i, i, one);
 
-		for(flmdim_t j = i+1; j < msrc->height; j++){
+		for(flmdim_t j = i+1; j < heightSrc; j++){
 			fixedLMClearErrno();
 			temp2 = fixedLMRetrieveValue(msrc, i, j);
 			code  = fixedLMRowSubWeighted(msrc,  i, j ,msrc->type,  temp2);
@@ -77,9 +81,9 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
 	flmdim_t row;
 	flmdim_t col;
 
-	for(flmdim_t i = 0; i < msrc->width; i++){
+	for(flmdim_t i = 0; i < widthSrc; i++){
 		
-		row   = msrc->width - i - 1;
+		row   = widthSrc - i - 1;
 		col	  = row;
 		temp1 = fixedLMRetrieveValue(msrc, row, col);
 

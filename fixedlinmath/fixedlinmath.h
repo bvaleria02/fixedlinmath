@@ -13,7 +13,7 @@ typedef uint8_t flmtype_t;
 typedef uint8_t flmflag_t;
 typedef uint64_t flmretrieve_t;
 
-typedef enum _DATA_TYPE_ {
+typedef enum {
 	FIXED32_T	= 0,	
 	UFIXED32_T	= 1,	
 	FIXED64_T	= 2,	
@@ -23,6 +23,7 @@ typedef enum _DATA_TYPE_ {
 typedef struct {
 	flmflag_t isSet;
 	flmflag_t isDataAllocated;
+	flmflag_t isTransposed;
 	flmdim_t height;
 	flmdim_t width;
 	flmtype_t type;
@@ -59,6 +60,12 @@ typedef enum{
 	FLM_DATA_MANUAL			= 0,
 	FLM_DATA_ALLOCATED		= 1
 } FLMDataMemory;
+
+typedef enum{
+	FLM_MATRIX_NOTTRANSPOSED	= 0,
+	FLM_MATRIX_TRANSPOSED		= 1
+} FLMMatrixTranspose;
+
 
 typedef const char *FLMFunctionName;
 typedef const char *FLMFileName;
@@ -186,6 +193,8 @@ FLMErrorCode fixedLMDestroyMatrix(flmmat_t *mat);
 // fixedlinmath/access.c
 flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t x, flmdim_t y);
 FLMErrorCode fixedLMSetValue(flmmat_t *mat, flmdim_t x, flmdim_t y, flmretrieve_t value);
+flmdim_t fixedLMGetWidth(flmmat_t *mat);
+flmdim_t fixedLMGetHeight(flmmat_t *mat);
 
 // fixedlinmath/fixedlmerrno.c
 FLMErrorCode fixedLMGetErrno();
@@ -253,6 +262,8 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest);
 
 // fixedlinmath/fixedlmtraspose.c
 FLMErrorCode fixedLMTranspose(flmmat_t *mat);
+FLMErrorCode fixedLMTransposeDeep(flmmat_t *mat);
+FLMErrorCode fixedLMTransposeVirtual(flmmat_t *mat);
 
 // fixedlinmath/fixedlmdotproduct.c
 FLMErrorCode fixedLMDotElementWise(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3);

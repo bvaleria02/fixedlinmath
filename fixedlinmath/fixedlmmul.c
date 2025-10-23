@@ -13,15 +13,22 @@ FLMErrorCode fixedLMMul(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(m1->width != m2->height){
+	flmdim_t height1 = fixedLMGetHeight(m1);
+	flmdim_t width1 = fixedLMGetWidth(m1);
+	flmdim_t height2 = fixedLMGetHeight(m2);
+	flmdim_t width2 = fixedLMGetWidth(m2);
+	flmdim_t height3 = fixedLMGetHeight(m3);
+	flmdim_t width3 = fixedLMGetWidth(m3);
+
+	if(width1 != height2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m2->width != m3->width){
+	if(width2 != width3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->height != m3->height){
+	if(height1 != height3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
@@ -31,12 +38,12 @@ FLMErrorCode fixedLMMul(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 	flmretrieve_t acc;
 	flmretrieve_t x3;
 
-	for(flmdim_t i = 0; i < m1->height; i++){
-		for(flmdim_t j = 0; j < m2->width; j++){
+	for(flmdim_t i = 0; i < height1; i++){
+		for(flmdim_t j = 0; j < width2; j++){
 			
 			acc = F64_ZERO;
 
-			for(flmdim_t k = 0; k < m1->width; k++){
+			for(flmdim_t k = 0; k < width1; k++){
 				//printf("i: %i\tj: %i\tk: %i\n", i, j, k);
 				x1 = fixedLMRetrieveValue(m1, k, i);
 				x1 = typeAbstractValueConverterIn(m1->type, x1);
@@ -76,11 +83,16 @@ FLMErrorCode fixedLMMulScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmret
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(m1->width != m2->width){
+	flmdim_t height1 = fixedLMGetHeight(m1);
+	flmdim_t width1 = fixedLMGetWidth(m1);
+	flmdim_t height2 = fixedLMGetHeight(m2);
+	flmdim_t width2 = fixedLMGetWidth(m2);
+
+	if(width1 != width2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->height != m2->height){
+	if(height1 != height2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
@@ -91,8 +103,8 @@ FLMErrorCode fixedLMMulScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmret
 	code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 
-	for(flmdim_t i = 0; i < m1->height; i++){
-		for(flmdim_t j = 0; j < m1->width; j++){
+	for(flmdim_t i = 0; i < height1; i++){
+		for(flmdim_t j = 0; j < width1; j++){
 			x1 = fixedLMRetrieveValue(m1, j, i);
 			x1 = typeAbstractValueConverterIn(m1->type, x1);
 			code = fixedLMGetErrno();
@@ -118,7 +130,10 @@ FLMErrorCode fixedLMRowMulScalar(flmmat_t *mat, flmdim_t row, flmtype_t type, fl
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(row >= mat->height){
+	flmdim_t height = fixedLMGetHeight(mat);
+	flmdim_t width = fixedLMGetWidth(mat);
+
+	if(row >= height){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
@@ -129,7 +144,7 @@ FLMErrorCode fixedLMRowMulScalar(flmmat_t *mat, flmdim_t row, flmtype_t type, fl
 	code  = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 
-	for(flmdim_t i = 0; i < mat->width; i++){
+	for(flmdim_t i = 0; i < width; i++){
 		temp1 = fixedLMRetrieveValue(mat, i, row);
 		temp1 = typeAbstractValueConverterIn(mat->type, temp1);
 		code  = fixedLMGetErrno();
@@ -154,7 +169,10 @@ FLMErrorCode fixedLMColMulScalar(flmmat_t *mat, flmdim_t col, flmtype_t type, fl
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(col >= mat->width){
+	flmdim_t height = fixedLMGetHeight(mat);
+	flmdim_t width = fixedLMGetWidth(mat);
+
+	if(col >= width){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
@@ -165,7 +183,7 @@ FLMErrorCode fixedLMColMulScalar(flmmat_t *mat, flmdim_t col, flmtype_t type, fl
 	code  = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 
-	for(flmdim_t i = 0; i < mat->height; i++){
+	for(flmdim_t i = 0; i < height; i++){
 		temp1 = fixedLMRetrieveValue(mat, col, i);
 		temp1 = typeAbstractValueConverterIn(mat->type, temp1);
 		code  = fixedLMGetErrno();

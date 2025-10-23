@@ -19,6 +19,7 @@ FLMErrorCode fixedLMCreateMatrix(flmmat_t *mat, flmdim_t width, flmdim_t height,
 	mat->data	= data;
 	mat->isSet	= FLM_MATRIX_SET;
 	mat->isDataAllocated = FLM_DATA_MANUAL;
+	mat->isTransposed = FLM_MATRIX_NOTTRANSPOSED;
 
 	return FLM_NO_ERROR;
 }
@@ -65,6 +66,7 @@ FLMErrorCode fixedLMResetMatrix(flmmat_t *mat){
 	mat->height = 0;
 	mat->isSet = FLM_MATRIX_UNSET;
 	mat->isDataAllocated = FLM_DATA_MANUAL;
+	mat->isTransposed = FLM_MATRIX_NOTTRANSPOSED;
 
 	return FLM_NO_ERROR;
 }

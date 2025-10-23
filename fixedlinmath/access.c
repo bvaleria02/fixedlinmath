@@ -4,11 +4,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static inline uint32_t getElementMatrix(flmmat_t *mat, flmdim_t x,flmdim_t y){
-	return (y * mat->width) + x;
+static inline uint32_t getElementMatrix(flmmat_t *mat, flmdim_t col,flmdim_t row){
+	if(mat->isTransposed == FLM_MATRIX_TRANSPOSED){
+		return (col * mat->width) + row;
+	}
+	return (row * mat->width) + col;
 }
 
-flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t x, flmdim_t y){
+flmdim_t fixedLMGetWidth(flmmat_t *mat){
+	if(mat == NULL){
+		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_DIM_ERROR);
+	}
+
+	if(mat->isTransposed == FLM_MATRIX_TRANSPOSED){
+		return mat->height;
+	}
+
+	return mat->width;
+}
+
+flmdim_t fixedLMGetHeight(flmmat_t *mat){
+	if(mat == NULL){
+		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_DIM_ERROR);
+	}
+
+	if(mat->isTransposed == FLM_MATRIX_TRANSPOSED){
+		return mat->width;
+	}
+
+	return mat->height;
+}
+
+
+flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t col, flmdim_t row){
 	if(mat == NULL){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_ERROR_VALUE);
 	}
@@ -17,15 +45,15 @@ flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t x, flmdim_t y){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_MATRIXUNSET, FLM_ERROR_VALUE);
 	}
 
-	if(x >= mat->width){
+	if(col >= fixedLMGetWidth(mat)){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_DIMENSION, FLM_ERROR_VALUE);
 	}
 
-	if(y >= mat->height){
+	if(row >= fixedLMGetHeight(mat)){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_DIMENSION, FLM_ERROR_VALUE);
 	}
 
-	uint32_t element = getElementMatrix(mat, x, y);
+	uint32_t element = getElementMatrix(mat, col, row);
 	flmretrieve_t value = 0;
 
 	FLM_TYPE_EXEC(mat->type, {
@@ -37,7 +65,7 @@ flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t x, flmdim_t y){
 	return value;
 }
 
-FLMErrorCode fixedLMSetValue(flmmat_t *mat, flmdim_t x, flmdim_t y, flmretrieve_t value){
+FLMErrorCode fixedLMSetValue(flmmat_t *mat, flmdim_t col, flmdim_t row, flmretrieve_t value){
 	if(mat == NULL){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
 	}
@@ -46,15 +74,16 @@ FLMErrorCode fixedLMSetValue(flmmat_t *mat, flmdim_t x, flmdim_t y, flmretrieve_
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(x >= mat->width){
+	if(col >= fixedLMGetWidth(mat)){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(y >= mat->height){
+	if(row >= fixedLMGetHeight(mat)){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	uint32_t element = getElementMatrix(mat, x, y);
+	uint32_t element = getElementMatrix(mat, col, row);
+	printf("trans: %i\tcol: %i\trow: %i\tIndex: %i\n", mat->isTransposed, col, row, element);
 
 	FLM_TYPE_EXEC(mat->type, {
 		((flmdtype_t *)mat->data)[element] = (flmdtype_t)value;

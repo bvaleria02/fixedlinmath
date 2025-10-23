@@ -13,19 +13,26 @@ FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(m1->width != m2->width){
+	flmdim_t height1 = fixedLMGetHeight(m1);
+	flmdim_t width1 = fixedLMGetWidth(m1);
+	flmdim_t height2 = fixedLMGetHeight(m2);
+	flmdim_t width2 = fixedLMGetWidth(m2);
+	flmdim_t height3 = fixedLMGetHeight(m3);
+	flmdim_t width3 = fixedLMGetWidth(m3);
+
+	if(width1 != width2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->height != m2->height){
+	if(height1 != height2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->height != 1 || m2->height != 1 || m3->height != 1){
+	if(height1 != 1 || height2 != 1 || height3 != 1){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);
 	}
 
-	if(m1->width != 3 || m2->width != 3 || m3->width != 3){
+	if(width1 != 3 || width2 != 3 || width3 != 3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
@@ -135,19 +142,26 @@ FLMErrorCode fixedLMCrossCol3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
 	}
 
-	if(m1->width != m2->width){
+	flmdim_t height1 = fixedLMGetHeight(m1);
+	flmdim_t width1 = fixedLMGetWidth(m1);
+	flmdim_t height2 = fixedLMGetHeight(m2);
+	flmdim_t width2 = fixedLMGetWidth(m2);
+	flmdim_t height3 = fixedLMGetHeight(m3);
+	flmdim_t width3 = fixedLMGetWidth(m3);
+
+	if(width1 != width2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->height != m2->height){
+	if(height1 != height2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
-	if(m1->width != 1 || m2->width != 1 || m3->width != 1){
+	if(width1 != 1 || width2 != 1 || width3 != 1){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);
 	}
 
-	if(m1->height != 3 || m2->height != 3 || m3->height != 3){
+	if(height1 != 3 || height2 != 3 || height3 != 3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 

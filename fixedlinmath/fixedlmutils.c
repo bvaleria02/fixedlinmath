@@ -96,17 +96,20 @@ flmdim_t getNonZeroRowFromColumnIndex(flmmat_t *mat, flmdim_t col, flmdim_t row)
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_ERROR_VALUE);
 	}
 
-	if(col >= mat->width){
+	flmdim_t height = fixedLMGetHeight(mat);
+	flmdim_t width = fixedLMGetWidth(mat);
+
+	if(col >= width){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_DIMENSION, FLM_ERROR_VALUE);
 	}
 
-	if(row >= mat->width){
+	if(row >= width){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_DIMENSION, FLM_ERROR_VALUE);
 	}
 
 	flmretrieve_t temp1;
 
-	for(flmdim_t i = row; i < mat->height; i++){
+	for(flmdim_t i = row; i < height; i++){
 		temp1 = fixedLMRetrieveValue(mat, col, i);
 		if(temp1 != 0){
 			return i;
@@ -129,7 +132,10 @@ flmflag_t fixedLMIsMatrixNotEye(flmmat_t *mat){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_MATRIXUNSET, FLM_FLAG_NOTEYE);
 	}
 
-	if(mat->width != mat->height){
+	flmdim_t height = fixedLMGetHeight(mat);
+	flmdim_t width = fixedLMGetWidth(mat);
+
+	if(width != height){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_RECTANGULAR, FLM_FLAG_NOTEYE);
 	}
 
@@ -137,8 +143,8 @@ flmflag_t fixedLMIsMatrixNotEye(flmmat_t *mat){
 	flmretrieve_t one  = getOneValueByType(mat->type);
 	flmretrieve_t zero = getZeroValueByType(mat->type);
 
-	for(flmdim_t i = 0; i < mat->height; i++){
-		for(flmdim_t j = 0; j < mat->width; j++){
+	for(flmdim_t i = 0; i < height; i++){
+		for(flmdim_t j = 0; j < width; j++){
 			temp1 = fixedLMRetrieveValue(mat, j, i);
 			//printf("col: %i\trow: %i\tvalue: %016lx\n", j, i, temp1);
 			if((i == j) && (temp1 == one)){
