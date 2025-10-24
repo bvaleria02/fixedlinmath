@@ -242,38 +242,46 @@ void virtualTranspose(){
 	fixedLMPrintMatrix(&m4);
 }
 
+
+#define TEST_DIM 4
+
 void LUDecomp(){
-	fixed32_t dataA[9];
-	fixed32_t dataL[9];
-	fixed32_t dataU[9];
+	fixed32_t dataA[TEST_DIM * TEST_DIM];
+	fixed32_t dataL[TEST_DIM * TEST_DIM];
+	fixed32_t dataU[TEST_DIM * TEST_DIM];
 	flmmat_t a, l, u;
 	
-	fixedLMCreateMatrix(&a, 3, 3, FIXED32_T, dataA);
-	fixedLMCreateMatrix(&l, 3, 3, FIXED32_T, dataL);
-	fixedLMCreateMatrix(&u, 3, 3, FIXED32_T, dataU);
+	fixedLMCreateMatrix(&a, TEST_DIM, TEST_DIM, FIXED32_T, dataA);
+	fixedLMCreateMatrix(&l, TEST_DIM, TEST_DIM, FIXED32_T, dataL);
+	fixedLMCreateMatrix(&u, TEST_DIM, TEST_DIM, FIXED32_T, dataU);
 
-	fixedLMSetValue(&a, 0, 0, 0x20000);		//  2.0
-	fixedLMSetValue(&a, 1, 0, 0x00000);		//  0.0
-	fixedLMSetValue(&a, 2, 0, 0xFFFEFFFF);	// -1.0
-	fixedLMSetValue(&a, 0, 1, 0xFFFBFFFF);	// -4.0
-	fixedLMSetValue(&a, 1, 1, 0x20000);		//  2.0
-	fixedLMSetValue(&a, 2, 1, 0x00000);		//  0.0
-	fixedLMSetValue(&a, 0, 2, 0x00000);		//  0.0
-	fixedLMSetValue(&a, 1, 2, 0xFFFAFFFF);	// -5.0
-	fixedLMSetValue(&a, 2, 2, 0xFFFAFFFF);	// -5.0
+	fixedLMEye(&a);
+	fixedLMSetValue(&a, 0, 0, 0x30000);		//  1.0
+	fixedLMSetValue(&a, 1, 0, 0x30000);		//  3.0
+	fixedLMSetValue(&a, 2, 0, 0x50000);		//  5.0
+	fixedLMSetValue(&a, 3, 0, 0x90000);		//  9.0
+	fixedLMSetValue(&a, 0, 1, 0X10000);		//  1.0
+	fixedLMSetValue(&a, 1, 1, 0x30000);		//  3.0
+	fixedLMSetValue(&a, 2, 1, 0x10000);		//  1.0
+	fixedLMSetValue(&a, 3, 1, 0x70000);		//  7.0
+	fixedLMSetValue(&a, 0, 2, 0x40000);		//  4.0
+	fixedLMSetValue(&a, 1, 2, 0x30000);		//  3.0
+	fixedLMSetValue(&a, 2, 2, 0x90000);		//  9.0
+	fixedLMSetValue(&a, 3, 2, 0x70000);		//  7.0
+	fixedLMSetValue(&a, 0, 3, 0x50000);		//  5.0
+	fixedLMSetValue(&a, 1, 3, 0x20000);		//  2.0
+	fixedLMSetValue(&a, 2, 3, 0x00000);		//  0.0
+	fixedLMSetValue(&a, 3, 3, 0x90000);		//  9.0
 
+	fixedLMPrintError();
 	fixedLMPrintMatrix(&a);
 
-	fixedLMLUDecomposition(&a, &l, &u);
-	fixedLMPrintMatrix(&a);
-	fixedLMPrintMatrix(&l);
-	fixedLMPrintMatrix(&u);
-
-	flmretrieve_t det;
-	fixedLMDeterminant3x3(&a, FIXED64_T, &det);
-	fixedLMDeterminant(&a, &l, &u, FIXED64_T, &det);
-	printf("Det: %lf\n", convertF64ToDouble(det));
-
+	flmretrieve_t det4x4;
+	flmretrieve_t detLU;
+	fixedLMDeterminantLU(&a, &l, &u, FIXED64_T, &detLU);
+	fixedLMDeterminant4x4(&a, FIXED64_T, &det4x4);
+	printf("Det 4x4: %lf\n", convertF64ToDouble(det4x4));
+	printf("Det LU: %lf\n", convertF64ToDouble(detLU));
 }
 
 int main(){

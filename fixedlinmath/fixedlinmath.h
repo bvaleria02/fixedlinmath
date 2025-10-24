@@ -21,6 +21,7 @@ typedef enum {
 } FLMDataType;
 
 typedef struct {
+	// flags and type will be combined on the next patch.
 	flmflag_t isSet;
 	flmflag_t isDataAllocated;
 	flmflag_t isTransposed;
@@ -288,7 +289,7 @@ FLMErrorCode fixedLMValueSwap(flmmat_t *matSrc, flmmat_t *matDest, flmdim_t colS
 // fixedlinmath/fixedlmgaussjordan.c
 FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest);
 
-// fixedlinmath/fixedlmtraspose.c
+// fixedlinmath/fixedlmtranspose.c
 FLMErrorCode fixedLMTranspose(flmmat_t *mat);
 FLMErrorCode fixedLMTransposeDeep(flmmat_t *mat);
 FLMErrorCode fixedLMTransposeVirtual(flmmat_t *mat);
@@ -311,6 +312,7 @@ FLMErrorCode fixedLMDeterminant0x0(flmmat_t *a, flmtype_t type, flmretrieve_t *v
 FLMErrorCode fixedLMDeterminant1x1(flmmat_t *a, flmtype_t type, flmretrieve_t *value);
 FLMErrorCode fixedLMDeterminant2x2(flmmat_t *a, flmtype_t type, flmretrieve_t *value);
 FLMErrorCode fixedLMDeterminant3x3(flmmat_t *a, flmtype_t type, flmretrieve_t *value);
+FLMErrorCode fixedLMDeterminant4x4(flmmat_t *a, flmtype_t type, flmretrieve_t *value);
 FLMErrorCode fixedLMDeterminantLU(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmtype_t type, flmretrieve_t *value);
 
 #endif // FIXED_LIN_MATH_H

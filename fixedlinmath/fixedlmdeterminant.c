@@ -29,6 +29,9 @@ FLMErrorCode fixedLMDeterminant(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmtype_t
 		case 3:		code = fixedLMDeterminant3x3(a, type, value);
 					break;
 
+		case 4:		code = fixedLMDeterminant4x4(a, type, value);
+					break;
+
 		default: 	code = fixedLMDeterminantLU(a, l, u, type, value);
 					break;
 
@@ -230,6 +233,188 @@ FLMErrorCode fixedLMDeterminantLU(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmtype
 
 	acc = typeAbstractValueConverterOut(type, acc);
 	(*value) = acc;
+
+	return FLM_NO_ERROR;
+}
+
+FLMErrorCode fixedLMDeterminant4x4(flmmat_t *a, flmtype_t type, flmretrieve_t *value){
+	if(value == NULL){
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
+	}
+
+	HANDLE_INVALID_MATRIX(a);
+
+	flmdim_t widthA, heightA;
+	HANDLE_RECTANGLE_MATRIX(a, widthA, heightA);
+
+	if(widthA < 4){
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
+	}
+
+/*
+	A = [a b c d]  det = a * (f(kp- ol) - g(jp - nl) + h(jo - nk))
+		[e f g h]		-b * (e(kp- ol) - g(ip - ml) + h(io - mk))
+		[i j k l]       +c * (e(jp- nl) - f(ip - ml) + h(in - mj))
+		[m n o p]		-d * (e(jo- nk) - f(io - mk) + g(in - mj))
+
+
+	"Please, pray for me and my mental sanity, I'm not going to do the 5x5 unroll... or maybe?"
+*/
+
+	FLM_CLEAR_ERROR();
+
+	flmretrieve_t A = fixedLMRetrieveValue(a, 0, 0);
+	A = typeAbstractValueConverterIn(a->type, A);
+
+	flmretrieve_t B = fixedLMRetrieveValue(a, 1, 0);
+	B = typeAbstractValueConverterIn(a->type, B);
+
+	flmretrieve_t C = fixedLMRetrieveValue(a, 2, 0);
+	C = typeAbstractValueConverterIn(a->type, C);
+
+	flmretrieve_t D = fixedLMRetrieveValue(a, 3, 0);
+	D = typeAbstractValueConverterIn(a->type, D);
+
+	flmretrieve_t E = fixedLMRetrieveValue(a, 0, 1);
+	E = typeAbstractValueConverterIn(a->type, E);
+
+	flmretrieve_t F = fixedLMRetrieveValue(a, 1, 1);
+	F = typeAbstractValueConverterIn(a->type, F);
+
+	flmretrieve_t G = fixedLMRetrieveValue(a, 2, 1);
+	G = typeAbstractValueConverterIn(a->type, G);
+
+	flmretrieve_t H = fixedLMRetrieveValue(a, 3, 1);
+	H = typeAbstractValueConverterIn(a->type, H);
+
+	flmretrieve_t I = fixedLMRetrieveValue(a, 0, 2);
+	I = typeAbstractValueConverterIn(a->type, I);
+
+	flmretrieve_t J = fixedLMRetrieveValue(a, 1, 2);
+	J = typeAbstractValueConverterIn(a->type, J);
+
+	flmretrieve_t K = fixedLMRetrieveValue(a, 2, 2);
+	K = typeAbstractValueConverterIn(a->type, K);
+
+	flmretrieve_t L = fixedLMRetrieveValue(a, 3, 2);
+	L = typeAbstractValueConverterIn(a->type, L);
+
+	flmretrieve_t M = fixedLMRetrieveValue(a, 0, 3);
+	M = typeAbstractValueConverterIn(a->type, M);
+
+	flmretrieve_t N = fixedLMRetrieveValue(a, 1, 3);
+	N = typeAbstractValueConverterIn(a->type, N);
+
+	flmretrieve_t O = fixedLMRetrieveValue(a, 2, 3);
+	O = typeAbstractValueConverterIn(a->type, O);
+
+	flmretrieve_t P = fixedLMRetrieveValue(a, 3, 3);
+	P = typeAbstractValueConverterIn(a->type, P);
+
+	FLMErrorCode code = fixedLMGetErrno();
+	if(code != FLM_NO_ERROR) return code;
+
+/*
+Just a little intermission while you are wondering why I unrolled
+the 4x4 matrix determinant formula:
+
+It's too high to get over (yeah, yeah)
+You're too low to get under (yeah, yeah)
+You're stuck in the middle (yeah, yeah)
+And the pain is thunder (yeah, yeah)
+
+Lift your head up high and scream out to the world
+"I know I am someone, " and let the truth unfurl (hee-ha)
+No one can hurt you now, because you know what's true
+Yes, I believe in me, so you believe in you
+Help me sing it
+
+Ma-ma-se, ma-ma-sa, ma-ma-coo-sa (hoo-hoo)
+Ma-ma-se, ma-ma-sa, ma-ma-coo-sa (hee-hee-hee)
+Ma-ma-se, ma-ma-sa, ma-ma-coo-sa (hee-hee-hee)
+Ma-ma-se, ma-ma-sa, ma-ma-coo-sa
+
+Intermission done!
+*/
+
+	// a * ...
+	flmretrieve_t KP = fixedMul64(K, P);
+	flmretrieve_t OL = fixedMul64(O, L);
+	flmretrieve_t JP = fixedMul64(J, P);
+	flmretrieve_t NL = fixedMul64(N, L);
+	flmretrieve_t JO = fixedMul64(J, O);
+	flmretrieve_t NK = fixedMul64(N, K);
+
+	// b * ...
+	// KP, OL
+	flmretrieve_t IP = fixedMul64(I, P);
+	flmretrieve_t ML = fixedMul64(M, L);
+	flmretrieve_t IO = fixedMul64(I, O);
+	flmretrieve_t MK = fixedMul64(M, K);
+
+	// c * ...
+	// JP, NL, IP, ML
+	flmretrieve_t IN = fixedMul64(I, N);
+	flmretrieve_t MJ = fixedMul64(M, J);
+
+	// d * ...
+	// NK, IO, MK, IN, MJ
+	//flmretrieve_t JO = fixedMul64(K, P);
+
+	// a * 
+	flmretrieve_t KPOL = fixedSub64(KP, OL);
+	flmretrieve_t JPNL = fixedSub64(JP, NL);
+	flmretrieve_t JONK = fixedSub64(JO, NK);
+
+	// b * 
+	// KPOL, 
+	flmretrieve_t IPML = fixedSub64(IP, ML);
+	flmretrieve_t IOMK = fixedSub64(IO, MK);
+
+	// c * 
+	// JPNL, IPML
+	flmretrieve_t INMJ = fixedSub64(IN, MJ);
+
+	// d*
+	// JONK, IOMK, INMJ
+
+	flmretrieve_t FKPOL = fixedMul64(F, KPOL);
+	flmretrieve_t GJPNL = fixedMul64(G, JPNL);
+	flmretrieve_t HJONK = fixedMul64(H, JONK);
+
+	flmretrieve_t EKPOL = fixedMul64(E, KPOL);
+	flmretrieve_t GIPML = fixedMul64(G, IPML);
+	flmretrieve_t HIOMK = fixedMul64(H, IOMK);
+
+	flmretrieve_t EJPNL = fixedMul64(E, JPNL);
+	flmretrieve_t FIPML = fixedMul64(F, IPML);
+	flmretrieve_t HINMJ = fixedMul64(H, INMJ);
+
+	flmretrieve_t EJONK = fixedMul64(E, JONK);
+	flmretrieve_t FIOMK = fixedMul64(F, IOMK);
+	flmretrieve_t GINMJ = fixedMul64(G, INMJ);
+
+	flmretrieve_t FKPOL_GJPNL_HJONK = fixedSub64(FKPOL, GJPNL);
+	FKPOL_GJPNL_HJONK = fixedAdd64(FKPOL_GJPNL_HJONK, HJONK);
+	FKPOL_GJPNL_HJONK = fixedMul64(FKPOL_GJPNL_HJONK, A);
+
+	flmretrieve_t EKPOL_GIPML_HIOMK = fixedSub64(EKPOL, GIPML);
+	EKPOL_GIPML_HIOMK = fixedAdd64(EKPOL_GIPML_HIOMK, HIOMK);
+	EKPOL_GIPML_HIOMK = fixedMul64(EKPOL_GIPML_HIOMK, B);
+
+	flmretrieve_t EJPNL_FIPML_HINMJ = fixedSub64(EJPNL, FIPML);
+	EJPNL_FIPML_HINMJ = fixedAdd64(EJPNL_FIPML_HINMJ, HINMJ);
+	EJPNL_FIPML_HINMJ = fixedMul64(EJPNL_FIPML_HINMJ, C);
+
+	flmretrieve_t EJONK_FIOMK_GINMJ = fixedSub64(EJONK, FIOMK);
+	EJONK_FIOMK_GINMJ = fixedAdd64(EJONK_FIOMK_GINMJ, GINMJ);
+	EJONK_FIOMK_GINMJ = fixedMul64(EJONK_FIOMK_GINMJ, D);
+
+	flmretrieve_t acc   = fixedSub64(FKPOL_GJPNL_HJONK, EKPOL_GIPML_HIOMK);
+	acc					= fixedAdd64(acc,   EJPNL_FIPML_HINMJ);
+	acc					= fixedSub64(acc,   EJONK_FIOMK_GINMJ);
+
+	(*value) = typeAbstractValueConverterOut(type, acc);
 
 	return FLM_NO_ERROR;
 }
