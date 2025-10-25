@@ -55,6 +55,7 @@ FLMErrnoString errnoStringConsts[FLMERRNOSTRING_SIZE] = {
 	"The matrix data is static, not allocated in heap",
 	"The matrix is not a vector (Nx1)",
 	"Trying to change a value in a matrix marked as \"Read Only\"",
+	"Passed width=0 or height=0 to create a matrix or a view",
 };
 
 FLMErrnoString fixedLMGetErrnoString(FLMErrorCode code){

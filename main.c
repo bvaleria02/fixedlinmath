@@ -292,6 +292,17 @@ void LUDecomp(){
 	fixedLMPrintError();
 	printf("Det 4x4: %lf\n", convertF64ToDouble(det4x4));
 	printf("Det LU: %lf\n", convertF64ToDouble(detLU));
+
+	flmmat_t view;
+	fixedLMCreateView(&view, &a, 1, 1, 3, 2);
+	fixedLMPrintMatrix(&view);
+	fixedLMPrintError();
+
+	fixedLMSetFlag(&view, FLM_FLAG_TRANSPOSED);
+	//fixedLMClearFlag(&view, FLM_FLAG_VIEW);
+	fixedLMPrintMatrix(&view);
+	fixedLMPrintError();
+
 }
 
 int main(){

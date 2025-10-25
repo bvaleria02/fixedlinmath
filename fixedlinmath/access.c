@@ -5,22 +5,47 @@
 #include <stdlib.h>
 
 static inline uint32_t getElementMatrix(flmmat_t *mat, flmdim_t col,flmdim_t row){
+	flmflag_t isTransposed = fixedLMIsTransposed(mat);
+	flmflag_t isView 	   = fixedLMIsView(mat);
+
 	if(fixedLMIsTransposed(mat)){
-		return (col * mat->width) + row;
 	}
-	return (row * mat->width) + col;
+
+	uint32_t element;
+
+	if(isTransposed && isView){
+		element = ((mat->viewDetails.colOffset + col) * mat->width) + (mat->viewDetails.rowOffset + row);
+	} else if(isTransposed && !isView){
+		element=  (col * mat->width) + row;
+	} else if(!isTransposed && isView){
+		element = ((mat->viewDetails.rowOffset + row) * mat->width) + (mat->viewDetails.colOffset + col);
+	} else{	
+		element = (row * mat->width) + col;
+	}
+
+	return element;
 }
 
 flmdim_t fixedLMGetWidth(flmmat_t *mat){
 	if(mat == NULL){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_DIM_ERROR);
 	}
+	
+	flmflag_t isTransposed = fixedLMIsTransposed(mat);
+	flmflag_t isView 	   = fixedLMIsView(mat);
 
-	if(fixedLMIsTransposed(mat)){
-		return mat->height;
+	flmdim_t width;
+	if(isTransposed && isView){
+		width = mat->viewDetails.viewHeight;
+	} else if(isTransposed && !isView){
+		width = mat->height;
+	} else if(!isTransposed && isView){
+		width = mat->viewDetails.viewWidth;
+	} else{	
+		width = mat->width;
 	}
 
-	return mat->width;
+	return width;
 }
 
 flmdim_t fixedLMGetHeight(flmmat_t *mat){
@@ -28,11 +53,21 @@ flmdim_t fixedLMGetHeight(flmmat_t *mat){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_DIM_ERROR);
 	}
 
-	if(fixedLMIsTransposed(mat)){
-		return mat->width;
+	flmflag_t isTransposed = fixedLMIsTransposed(mat);
+	flmflag_t isView 	   = fixedLMIsView(mat);
+
+	flmdim_t height;
+	if(isTransposed && isView){
+		height = mat->viewDetails.viewWidth;
+	} else if(isTransposed && !isView){
+		height = mat->width;
+	} else if(!isTransposed && isView){
+		height = mat->viewDetails.viewHeight;
+	} else{	
+		height = mat->height;
 	}
 
-	return mat->height;
+	return height;
 }
 
 

@@ -20,6 +20,14 @@ typedef enum {
 	UFIXED64_T	= 3,	
 } FLMDataType;
 
+
+typedef struct{
+	flmdim_t colOffset;
+	flmdim_t rowOffset;
+	flmdim_t viewWidth;
+	flmdim_t viewHeight;
+} flmviewdetails_t;
+
 typedef struct {
 	flmflag_t config;
 	/*
@@ -31,12 +39,13 @@ typedef struct {
 	flmdim_t height;
 	flmdim_t width;
 	// Deprecated: flmtype_t type;
+	flmviewdetails_t viewDetails;
 	void *data;
 } flmmat_t;
 
 /*	
 	flmmat_t->config bit struct:
-	b7:		(unused)
+	b7:		isView
 	b6:		isReadOnly
 	b5:		isDataAllocated
 	b4:		isTransposed
@@ -59,33 +68,20 @@ typedef enum {
 	FLM_ERROR_NOTHEAPMEMORY = 11,
 	FLM_ERROR_NOTVECTOR		= 12,
 	FLM_ERROR_READONLY		= 13,
+	FLM_ERROR_ZERODIM		= 14,
 } FLMErrorCode;
-
-typedef enum{
-	FLM_MATRIX_UNSET		= 0,
-	FLM_MATRIX_SET			= 1
-} FLMMatrixSet;
 
 typedef enum{
 	FLM_NO_FLAG				= 0,
 	FLM_FLAG_NOTEYE			= 1
 } FLMFlag;
 
-typedef enum{
-	FLM_DATA_MANUAL			= 0,
-	FLM_DATA_ALLOCATED		= 1
-} FLMDataMemory;
-
-typedef enum{
-	FLM_MATRIX_NOTTRANSPOSED	= 0,
-	FLM_MATRIX_TRANSPOSED		= 1
-} FLMMatrixTranspose;
-
 #define FLM_FLAG_TYPE 			0x07
 #define FLM_FLAG_SET  			0x08
 #define FLM_FLAG_TRANSPOSED  	0x10
 #define FLM_FLAG_DATAALLOCATED	0x20
 #define FLM_FLAG_READONLY		0x40
+#define FLM_FLAG_VIEW			0x80
 
 typedef const char *FLMFunctionName;
 typedef const char *FLMFileName;
@@ -287,11 +283,19 @@ extern _Thread_local FLMLineNumber flm_linenumber;
 	}														\
 } while(0)
 
+#define HANDLE_ZERODIM_MATRIX(_size) do{				\
+	if(_size == 0){										\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_ZERODIM);		\
+	}													\
+} while(0)
+
 // fixedlinmath/creatematrix.c
 FLMErrorCode fixedLMCreateMatrix(flmmat_t *mat, flmdim_t width, flmdim_t height, flmtype_t type, void *data);
 FLMErrorCode fixedLMAllocMatrix(flmmat_t *mat, flmdim_t width, flmdim_t height, flmtype_t type);
 FLMErrorCode fixedLMResetMatrix(flmmat_t *mat);
 FLMErrorCode fixedLMDestroyMatrix(flmmat_t *mat);
+FLMErrorCode fixedLMConfigureView(flmmat_t *mat, flmdim_t colOffset, flmdim_t rowOffset, flmdim_t viewWidth, flmdim_t viewHeight);
+FLMErrorCode fixedLMCreateView(flmmat_t *child, flmmat_t *parent, flmdim_t colOffset, flmdim_t rowOffset, flmdim_t viewWidth, flmdim_t viewHeight);
 
 // fixedlinmath/access.c
 flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t x, flmdim_t y);
@@ -304,6 +308,7 @@ flmflag_t fixedLMIsSet(flmmat_t *mat);
 flmflag_t fixedLMIsTransposed(flmmat_t *mat);
 flmflag_t fixedLMIsDataAllocated(flmmat_t *mat);
 flmflag_t fixedLMIsReadOnly(flmmat_t *mat);
+flmflag_t fixedLMIsView(flmmat_t *mat);
 
 FLMErrorCode fixedLMSetFlag(flmmat_t *mat, flmflag_t flag);
 FLMErrorCode fixedLMClearFlag(flmmat_t *mat, flmflag_t flag);

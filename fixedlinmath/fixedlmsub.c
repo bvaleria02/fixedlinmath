@@ -65,6 +65,7 @@ FLMErrorCode fixedLMSubScalar(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmret
 	}
 
 	HANDLE_INVALID_MATRIX(m1);
+	HANDLE_INVALID_MATRIX(m2);
 
 	flmdim_t height1, width1;
 	GET_DIMENSIONS_MATRIX(m1, width1, height1);

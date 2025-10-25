@@ -40,6 +40,11 @@ flmflag_t fixedLMIsReadOnly(flmmat_t *mat){
 	return getFlag(mat->config, FLM_FLAG_READONLY);
 }
 
+flmflag_t fixedLMIsView(flmmat_t *mat){
+	HANDLE_NULL_MATRIX_FLAG(mat);
+	return getFlag(mat->config, FLM_FLAG_VIEW);
+}
+
 FLMErrorCode fixedLMSetFlag(flmmat_t *mat, flmflag_t flag){
 	HANDLE_NULL_MATRIX_FLAG_RETURN_ERROR(mat);
 	mat->config = setFlag(mat->config, flag);
