@@ -8,7 +8,7 @@
 #include "../fixedpoint/fixedpoint.h"
 #include <stdint.h>
 
-typedef uint16_t flmdim_t;
+typedef uint32_t flmdim_t;
 typedef uint8_t flmtype_t;
 typedef uint8_t flmflag_t;
 typedef uint64_t flmretrieve_t;
@@ -21,15 +21,28 @@ typedef enum {
 } FLMDataType;
 
 typedef struct {
-	// flags and type will be combined on the next patch.
+	flmflag_t config;
+	/*
+	Deprecated
 	flmflag_t isSet;
 	flmflag_t isDataAllocated;
 	flmflag_t isTransposed;
+	*/
 	flmdim_t height;
 	flmdim_t width;
-	flmtype_t type;
+	// Deprecated: flmtype_t type;
 	void *data;
 } flmmat_t;
+
+/*	
+	flmmat_t->config bit struct:
+	b7:		(unused)
+	b6:		isReadOnly
+	b5:		isDataAllocated
+	b4:		isTransposed
+	b3:		isSet
+	b0-b2:	matrix type (fixed32_t, ufixed32_t, fixed64_t or ufixed64_t)
+*/
 
 typedef enum {
 	FLM_NO_ERROR			= 0,
@@ -45,6 +58,7 @@ typedef enum {
 	FLM_ERROR_MALLOC		= 10,
 	FLM_ERROR_NOTHEAPMEMORY = 11,
 	FLM_ERROR_NOTVECTOR		= 12,
+	FLM_ERROR_READONLY		= 13,
 } FLMErrorCode;
 
 typedef enum{
@@ -67,6 +81,11 @@ typedef enum{
 	FLM_MATRIX_TRANSPOSED		= 1
 } FLMMatrixTranspose;
 
+#define FLM_FLAG_TYPE 			0x07
+#define FLM_FLAG_SET  			0x08
+#define FLM_FLAG_TRANSPOSED  	0x10
+#define FLM_FLAG_DATAALLOCATED	0x20
+#define FLM_FLAG_READONLY		0x40
 
 typedef const char *FLMFunctionName;
 typedef const char *FLMFileName;
@@ -189,8 +208,20 @@ extern _Thread_local FLMLineNumber flm_linenumber;
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);			\
 	}														\
 															\
-	if(mat->isSet == FLM_MATRIX_UNSET){						\
+	if(fixedLMIsSet(mat)){						\
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);		\
+	}														\
+} while(0)
+
+#define HANDLE_INVALID_MATRIX_VOID(mat)	do{					\
+	if(mat == NULL){										\
+		FLM_RAISE_ERROR(FLM_ERROR_NULLPTR);					\
+		return;												\
+	}														\
+															\
+	if(fixedLMIsSet(mat)){									\
+		FLM_RAISE_ERROR(FLM_ERROR_MATRIXUNSET);				\
+		return;												\
 	}														\
 } while(0)
 
@@ -203,6 +234,11 @@ extern _Thread_local FLMLineNumber flm_linenumber;
 	}														\
 } while(0)
 
+#define GET_DIMENSIONS_MATRIX(mat, width, height) do{		\
+	width = fixedLMGetWidth(mat);							\
+	height = fixedLMGetHeight(mat);							\
+} while(0)
+
 #define HANDLE_NONMATCHING_MATRIX(widthA, heightA, widthB, heightB) do{		\
 	if(widthA != widthB){									\
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);		\
@@ -210,6 +246,44 @@ extern _Thread_local FLMLineNumber flm_linenumber;
 															\
 	if(heightA != heightB){									\
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);		\
+	}														\
+} while(0)
+
+#define HANDLE_NULL_MATRIX_FLAG(mat)	do{					\
+	if(mat == NULL){										\
+		FLM_RAISE_ERROR(FLM_ERROR_NULLPTR);					\
+		return 0x0;											\
+	}														\
+} while(0)
+
+#define HANDLE_NULL_MATRIX_FLAG_RETURN_ERROR(mat)	do{		\
+	if(mat == NULL){										\
+		FLM_RAISE_ERROR(FLM_ERROR_NULLPTR);					\
+		return FLM_ERROR_NULLPTR;							\
+	}														\
+} while(0)
+
+#define HANDLE_DIMENSIONS_MATRIX(_limit, _value) do{		\
+	if(_limit <= _value){									\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);		\
+	}														\
+} while(0)
+
+#define HANDLE_EXACTSIZE_MATRIX(_heightMat, _widthMat, _heightExpected, _widthExpected) do{		\
+	if(_widthExpected != _widthMat || _heightExpected != _heightMat){							\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);											\
+	}																							\
+} while(0)
+
+#define HANDLE_NONCOLVECT_MATRIX(width) do{					\
+	if(width != 1){											\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);		\
+	}														\
+} while(0)
+
+#define HANDLE_NONROWVECT_MATRIX(height) do{				\
+	if(height != 1){										\
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);		\
 	}														\
 } while(0)
 
@@ -224,6 +298,21 @@ flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t x, flmdim_t y);
 FLMErrorCode fixedLMSetValue(flmmat_t *mat, flmdim_t x, flmdim_t y, flmretrieve_t value);
 flmdim_t fixedLMGetWidth(flmmat_t *mat);
 flmdim_t fixedLMGetHeight(flmmat_t *mat);
+
+// fixedlinmath/fixedlmflags.c
+flmflag_t fixedLMIsSet(flmmat_t *mat);
+flmflag_t fixedLMIsTransposed(flmmat_t *mat);
+flmflag_t fixedLMIsDataAllocated(flmmat_t *mat);
+flmflag_t fixedLMIsReadOnly(flmmat_t *mat);
+
+FLMErrorCode fixedLMSetFlag(flmmat_t *mat, flmflag_t flag);
+FLMErrorCode fixedLMClearFlag(flmmat_t *mat, flmflag_t flag);
+flmflag_t    fixedLMGetFlag(flmmat_t *mat, flmflag_t flag);
+
+FLMErrorCode fixedLMSetType(flmmat_t *mat, flmtype_t type);
+flmtype_t fixedLMGetType(flmmat_t *mat);
+
+FLMErrorCode fixedLMToggleFlag(flmmat_t *mat, flmflag_t flag);
 
 // fixedlinmath/fixedlmerrno.c
 FLMErrorCode fixedLMGetErrno();

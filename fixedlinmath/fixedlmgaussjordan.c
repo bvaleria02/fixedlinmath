@@ -6,31 +6,25 @@
 #include "fixedlmprint.h"
 
 FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
-	if(msrc == NULL || mdest == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(msrc);
+	HANDLE_INVALID_MATRIX(mdest);
 
-	if(msrc->isSet == FLM_MATRIX_UNSET || mdest->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	flmdim_t heightSrc, widthSrc;
+	HANDLE_RECTANGLE_MATRIX(msrc, widthSrc, heightSrc);
 
-	flmdim_t heightSrc = fixedLMGetHeight(msrc);
-	flmdim_t widthSrc = fixedLMGetWidth(msrc);
-	flmdim_t heightDest = fixedLMGetHeight(mdest);
+	flmdim_t heightDest, widthDest;
+	GET_DIMENSIONS_MATRIX(mdest, widthDest, heightDest);
 
-	if(heightSrc != heightDest){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_NONMATCHING_MATRIX(0, heightSrc, 0, heightDest);
 
-	if(widthSrc != heightSrc){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_RECTANGULAR);
-	}
-	
+	flmtype_t typeSrc  = fixedLMGetType(msrc);
+	flmtype_t typeDest = fixedLMGetType(mdest);
+
 	FLMErrorCode code;
 
 	flmretrieve_t temp1;
 	flmretrieve_t temp2;
-	flmretrieve_t one = getOneValueByType(msrc->type);
+	flmretrieve_t one = getOneValueByType(typeSrc);
 
 	flmdim_t rowWithoutZero;
 	
@@ -55,9 +49,9 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
 		code  = fixedLMGetErrno();
 		if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 
-		code  = fixedLMRowDivScalar(msrc, i, msrc->type, temp1);
+		code  = fixedLMRowDivScalar(msrc, i, typeSrc, temp1);
 		if((code != FLM_NO_ERROR) && (code != FLM_ERROR_DIVZERO)) return code;
-		code  = fixedLMRowDivScalar(mdest, i, msrc->type, temp1);
+		code  = fixedLMRowDivScalar(mdest, i, typeSrc, temp1);
 		if((code != FLM_NO_ERROR) && (code != FLM_ERROR_DIVZERO)) return code;
 
 		// Ensures 1.0 value
@@ -66,9 +60,9 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
 		for(flmdim_t j = i+1; j < heightSrc; j++){
 			fixedLMClearErrno();
 			temp2 = fixedLMRetrieveValue(msrc, i, j);
-			code  = fixedLMRowSubWeighted(msrc,  i, j ,msrc->type,  temp2);
+			code  = fixedLMRowSubWeighted(msrc,  i, j ,typeSrc,  temp2);
 			if((code != FLM_NO_ERROR) && (code != FLM_ERROR_DIVZERO)) FLM_RAISE_RETURN_ERROR(code);
-			code  = fixedLMRowSubWeighted(mdest, i, j, msrc->type, temp2);
+			code  = fixedLMRowSubWeighted(mdest, i, j, typeSrc, temp2);
 			if((code != FLM_NO_ERROR) && (code != FLM_ERROR_DIVZERO)) FLM_RAISE_RETURN_ERROR(code);
 
 			// Ensures 0.0 value
@@ -91,9 +85,9 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
 			fixedLMClearErrno();
 
 			temp2 = fixedLMRetrieveValue(msrc, col, j);
-			code  =	fixedLMRowSubWeighted(msrc,  row, j, msrc->type, temp2);
+			code  =	fixedLMRowSubWeighted(msrc,  row, j, typeSrc, temp2);
 			if((code != FLM_NO_ERROR) && (code != FLM_ERROR_DIVZERO)) FLM_RAISE_RETURN_ERROR(code);
-			code  = fixedLMRowSubWeighted(mdest, row, j, msrc->type, temp2);
+			code  = fixedLMRowSubWeighted(mdest, row, j, typeSrc, temp2);
 			if((code != FLM_NO_ERROR) && (code != FLM_ERROR_DIVZERO)) FLM_RAISE_RETURN_ERROR(code);
 
 			// Ensures 0.0 value
@@ -106,5 +100,7 @@ FLMErrorCode fixedLMGaussJordan(flmmat_t *msrc, flmmat_t *mdest){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTINVERTIBLE);
 	}
 
+	(void) typeDest;
+	(void)widthDest;
 	return FLM_NO_ERROR;
 }

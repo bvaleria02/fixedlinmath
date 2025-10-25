@@ -6,20 +6,14 @@
 #include <stdlib.h>
 
 void fixedLMPrintMatrix(flmmat_t *mat){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, );
-		return;
-	}
-
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_MATRIXUNSET, );
-	}
+	HANDLE_INVALID_MATRIX_VOID(mat);
 
 	flmretrieve_t value;
 	double valueF;
 
-	flmdim_t height = fixedLMGetHeight(mat);
-	flmdim_t width = fixedLMGetWidth(mat);
+	flmdim_t height, width;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
+	flmtype_t typeMat = fixedLMGetType(mat);
 
 	printf("Columns: %i\tRows: %i\n",width, height);
 
@@ -29,7 +23,7 @@ void fixedLMPrintMatrix(flmmat_t *mat){
 		for(flmdim_t j = 0; j < width; j++){
 			value = fixedLMRetrieveValue(mat, j, i);
 
-			FLM_TYPE_EXEC_SPLIT(mat->type, {
+			FLM_TYPE_EXEC_SPLIT(typeMat, {
 				valueF = convertF32ToDouble(value);
 			}, {
 				valueF = convertUF32ToDouble(value);
@@ -60,6 +54,7 @@ FLMErrnoString errnoStringConsts[FLMERRNOSTRING_SIZE] = {
 	"Error allocating heap memory (malloc)",
 	"The matrix data is static, not allocated in heap",
 	"The matrix is not a vector (Nx1)",
+	"Trying to change a value in a matrix marked as \"Read Only\"",
 };
 
 FLMErrnoString fixedLMGetErrnoString(FLMErrorCode code){

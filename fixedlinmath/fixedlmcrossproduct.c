@@ -5,36 +5,29 @@
 #include <stdlib.h>
 
 FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
-	if(m1 == NULL || m2 == NULL || m3 == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(m1);
+	HANDLE_INVALID_MATRIX(m2);
+	HANDLE_INVALID_MATRIX(m3);
 
-	if(m1->isSet == FLM_MATRIX_UNSET || m2->isSet == FLM_MATRIX_UNSET || m3->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	flmdim_t height1, width1;
+	GET_DIMENSIONS_MATRIX(m1, width1, height1);
 
-	flmdim_t height1 = fixedLMGetHeight(m1);
-	flmdim_t width1 = fixedLMGetWidth(m1);
-	flmdim_t height2 = fixedLMGetHeight(m2);
-	flmdim_t width2 = fixedLMGetWidth(m2);
-	flmdim_t height3 = fixedLMGetHeight(m3);
-	flmdim_t width3 = fixedLMGetWidth(m3);
+	flmdim_t height2, width2;
+	GET_DIMENSIONS_MATRIX(m2, width2, height2);
 
-	if(width1 != width2){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmdim_t height3, width3;
+	GET_DIMENSIONS_MATRIX(m3, width3, height3);
 
-	if(height1 != height2){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_NONMATCHING_MATRIX(width1, height1, width2, height2);
+	HANDLE_NONMATCHING_MATRIX(width1, height1, width3, height3);
 
-	if(height1 != 1 || height2 != 1 || height3 != 1){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);
-	}
+	HANDLE_EXACTSIZE_MATRIX(height1, width1, 1, 3);
+	HANDLE_EXACTSIZE_MATRIX(height2, width2, 1, 3);
+	HANDLE_EXACTSIZE_MATRIX(height3, width3, 1, 3);
 
-	if(width1 != 3 || width2 != 3 || width3 != 3){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmtype_t type1 = fixedLMGetType(m1);
+	flmtype_t type2 = fixedLMGetType(m2);
+	flmtype_t type3 = fixedLMGetType(m3);
 
 	FLMErrorCode code;
 	flmretrieve_t temp1;
@@ -43,16 +36,15 @@ FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 	flmretrieve_t temp4;
 	flmretrieve_t acc;
 
-	// m1 = [a1, b1, c1]
-	// m2 = [a2, b2, c2]
-	// m3 = [a3, b3, c3]
-
-	// a3 = b1*c2 - c1*b2
-	// b3 = c1*a2 - c2*a1
-	// c3 = a1*b2 - a2*b1
-
-
 	/*
+		m1 = [a1, b1, c1]
+		m2 = [a2, b2, c2]
+		m3 = [a3, b3, c3]
+
+		a3 = b1*c2 - c1*b2
+		b3 = c1*a2 - c2*a1
+		c3 = a1*b2 - a2*b1
+
 		a3 = b1*c2 - c1*b2
 		temp1 = b1
 		temp2 = c2
@@ -62,19 +54,19 @@ FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 
 	FLM_CLEAR_ERROR();
 	temp1 = fixedLMRetrieveValue(m1, 1, 0);
-	temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+	temp1 = typeAbstractValueConverterIn(type1, temp1);
 
 	temp2 = fixedLMRetrieveValue(m2, 2, 0);
-	temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+	temp2 = typeAbstractValueConverterIn(type2, temp2);
 
 	temp3 = fixedLMRetrieveValue(m1, 2, 0);
-	temp3 = typeAbstractValueConverterIn(m2->type, temp3);
+	temp3 = typeAbstractValueConverterIn(type2, temp3);
 
 	temp4 = fixedLMRetrieveValue(m2, 1, 0);
-	temp4 = typeAbstractValueConverterIn(m2->type, temp4);
+	temp4 = typeAbstractValueConverterIn(type2, temp4);
 
 	acc   = fixedSub64(fixedMul64(temp1, temp2), fixedMul64(temp3, temp4));
-	acc   = typeAbstractValueConverterOut(m3->type, acc);
+	acc   = typeAbstractValueConverterOut(type3, acc);
 	code  = fixedLMSetValue(m3, 0, 0, acc);
 	if(code != FLM_NO_ERROR) return code;
 
@@ -88,19 +80,19 @@ FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 
 	FLM_CLEAR_ERROR();
 	temp1 = fixedLMRetrieveValue(m1, 2, 0);
-	temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+	temp1 = typeAbstractValueConverterIn(type1, temp1);
 
 	temp2 = fixedLMRetrieveValue(m2, 0, 0);
-	temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+	temp2 = typeAbstractValueConverterIn(type2, temp2);
 
 	temp3 = fixedLMRetrieveValue(m2, 2, 0);
-	temp3 = typeAbstractValueConverterIn(m2->type, temp3);
+	temp3 = typeAbstractValueConverterIn(type2, temp3);
 
 	temp4 = fixedLMRetrieveValue(m1, 0, 0);
-	temp4 = typeAbstractValueConverterIn(m2->type, temp4);
+	temp4 = typeAbstractValueConverterIn(type2, temp4);
 
 	acc   = fixedSub64(fixedMul64(temp1, temp2), fixedMul64(temp3, temp4));
-	acc   = typeAbstractValueConverterOut(m3->type, acc);
+	acc   = typeAbstractValueConverterOut(type3, acc);
 	code  = fixedLMSetValue(m3, 1, 0, acc);
 	if(code != FLM_NO_ERROR) return code;
 
@@ -114,19 +106,19 @@ FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 
 	FLM_CLEAR_ERROR();
 	temp1 = fixedLMRetrieveValue(m1, 0, 0);
-	temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+	temp1 = typeAbstractValueConverterIn(type1, temp1);
 
 	temp2 = fixedLMRetrieveValue(m2, 1, 0);
-	temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+	temp2 = typeAbstractValueConverterIn(type2, temp2);
 
 	temp3 = fixedLMRetrieveValue(m2, 0, 0);
-	temp3 = typeAbstractValueConverterIn(m2->type, temp3);
+	temp3 = typeAbstractValueConverterIn(type2, temp3);
 
 	temp4 = fixedLMRetrieveValue(m1, 1, 0);
-	temp4 = typeAbstractValueConverterIn(m2->type, temp4);
+	temp4 = typeAbstractValueConverterIn(type2, temp4);
 
 	acc   = fixedSub64(fixedMul64(temp1, temp2), fixedMul64(temp3, temp4));
-	acc   = typeAbstractValueConverterOut(m3->type, acc);
+	acc   = typeAbstractValueConverterOut(type3, acc);
 	code  = fixedLMSetValue(m3, 2, 0, acc);
 	if(code != FLM_NO_ERROR) return code;
 
@@ -134,36 +126,29 @@ FLMErrorCode fixedLMCrossRow3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 }
 
 FLMErrorCode fixedLMCrossCol3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
-	if(m1 == NULL || m2 == NULL || m3 == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(m1);
+	HANDLE_INVALID_MATRIX(m2);
+	HANDLE_INVALID_MATRIX(m3);
 
-	if(m1->isSet == FLM_MATRIX_UNSET || m2->isSet == FLM_MATRIX_UNSET || m3->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	flmdim_t height1, width1;
+	GET_DIMENSIONS_MATRIX(m1, width1, height1);
 
-	flmdim_t height1 = fixedLMGetHeight(m1);
-	flmdim_t width1 = fixedLMGetWidth(m1);
-	flmdim_t height2 = fixedLMGetHeight(m2);
-	flmdim_t width2 = fixedLMGetWidth(m2);
-	flmdim_t height3 = fixedLMGetHeight(m3);
-	flmdim_t width3 = fixedLMGetWidth(m3);
+	flmdim_t height2, width2;
+	GET_DIMENSIONS_MATRIX(m2, width2, height2);
 
-	if(width1 != width2){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmdim_t height3, width3;
+	GET_DIMENSIONS_MATRIX(m3, width3, height3);
 
-	if(height1 != height2){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_NONMATCHING_MATRIX(width1, height1, width2, height2);
+	HANDLE_NONMATCHING_MATRIX(width1, height1, width3, height3);
 
-	if(width1 != 1 || width2 != 1 || width3 != 1){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);
-	}
+	HANDLE_EXACTSIZE_MATRIX(height1, width1, 3, 1);
+	HANDLE_EXACTSIZE_MATRIX(height2, width2, 3, 1);
+	HANDLE_EXACTSIZE_MATRIX(height3, width3, 3, 1);
 
-	if(height1 != 3 || height2 != 3 || height3 != 3){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmtype_t type1 = fixedLMGetType(m1);
+	flmtype_t type2 = fixedLMGetType(m2);
+	flmtype_t type3 = fixedLMGetType(m3);
 
 	FLMErrorCode code;
 	flmretrieve_t temp1;
@@ -191,19 +176,19 @@ FLMErrorCode fixedLMCrossCol3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 
 	FLM_CLEAR_ERROR();
 	temp1 = fixedLMRetrieveValue(m1, 0, 1);
-	temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+	temp1 = typeAbstractValueConverterIn(type1, temp1);
 
 	temp2 = fixedLMRetrieveValue(m2, 0, 2);
-	temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+	temp2 = typeAbstractValueConverterIn(type2, temp2);
 
 	temp3 = fixedLMRetrieveValue(m1, 0, 2);
-	temp3 = typeAbstractValueConverterIn(m2->type, temp3);
+	temp3 = typeAbstractValueConverterIn(type2, temp3);
 
 	temp4 = fixedLMRetrieveValue(m2, 0, 1);
-	temp4 = typeAbstractValueConverterIn(m2->type, temp4);
+	temp4 = typeAbstractValueConverterIn(type2, temp4);
 
 	acc   = fixedSub64(fixedMul64(temp1, temp2), fixedMul64(temp3, temp4));
-	acc   = typeAbstractValueConverterOut(m3->type, acc);
+	acc   = typeAbstractValueConverterOut(type3, acc);
 	code  = fixedLMSetValue(m3, 0, 0, acc);
 	if(code != FLM_NO_ERROR) return code;
 
@@ -217,19 +202,19 @@ FLMErrorCode fixedLMCrossCol3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 
 	FLM_CLEAR_ERROR();
 	temp1 = fixedLMRetrieveValue(m1, 0, 2);
-	temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+	temp1 = typeAbstractValueConverterIn(type1, temp1);
 
 	temp2 = fixedLMRetrieveValue(m2, 0, 0);
-	temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+	temp2 = typeAbstractValueConverterIn(type2, temp2);
 
 	temp3 = fixedLMRetrieveValue(m2, 0, 2);
-	temp3 = typeAbstractValueConverterIn(m2->type, temp3);
+	temp3 = typeAbstractValueConverterIn(type2, temp3);
 
 	temp4 = fixedLMRetrieveValue(m1, 0, 0);
-	temp4 = typeAbstractValueConverterIn(m2->type, temp4);
+	temp4 = typeAbstractValueConverterIn(type2, temp4);
 
 	acc   = fixedSub64(fixedMul64(temp1, temp2), fixedMul64(temp3, temp4));
-	acc   = typeAbstractValueConverterOut(m3->type, acc);
+	acc   = typeAbstractValueConverterOut(type3, acc);
 	code  = fixedLMSetValue(m3, 0, 1, acc);
 	if(code != FLM_NO_ERROR) return code;
 
@@ -243,19 +228,19 @@ FLMErrorCode fixedLMCrossCol3d(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 
 	FLM_CLEAR_ERROR();
 	temp1 = fixedLMRetrieveValue(m1, 0, 0);
-	temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+	temp1 = typeAbstractValueConverterIn(type1, temp1);
 
 	temp2 = fixedLMRetrieveValue(m2, 0, 1);
-	temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+	temp2 = typeAbstractValueConverterIn(type2, temp2);
 
 	temp3 = fixedLMRetrieveValue(m2, 0, 0);
-	temp3 = typeAbstractValueConverterIn(m2->type, temp3);
+	temp3 = typeAbstractValueConverterIn(type2, temp3);
 
 	temp4 = fixedLMRetrieveValue(m1, 0, 1);
-	temp4 = typeAbstractValueConverterIn(m2->type, temp4);
+	temp4 = typeAbstractValueConverterIn(type2, temp4);
 
 	acc   = fixedSub64(fixedMul64(temp1, temp2), fixedMul64(temp3, temp4));
-	acc   = typeAbstractValueConverterOut(m3->type, acc);
+	acc   = typeAbstractValueConverterOut(type3, acc);
 	code  = fixedLMSetValue(m3, 0, 2, acc);
 	if(code != FLM_NO_ERROR) return code;
 

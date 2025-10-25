@@ -5,16 +5,10 @@
 #include <stdlib.h>
 
 FLMErrorCode fixedLMFill(flmmat_t *mat, flmretrieve_t value){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
-
-	flmdim_t height = fixedLMGetHeight(mat);
-	flmdim_t width = fixedLMGetWidth(mat);
+	flmdim_t height, width;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
 
 	FLMErrorCode code = FLM_NO_ERROR;
 
@@ -30,9 +24,10 @@ FLMErrorCode fixedLMFill(flmmat_t *mat, flmretrieve_t value){
 
 FLMErrorCode fixedLMZeros(flmmat_t *mat){
 	FLMErrorCode code = FLM_NO_ERROR;
+	flmtype_t typeMat = fixedLMGetType(mat);
 
 	fixedLMClearErrno();
-	flmretrieve_t zeroVal = getZeroValueByType(mat->type);
+	flmretrieve_t zeroVal = getZeroValueByType(typeMat);
 	code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 	
@@ -42,9 +37,10 @@ FLMErrorCode fixedLMZeros(flmmat_t *mat){
 
 FLMErrorCode fixedLMOnes(flmmat_t *mat){
 	FLMErrorCode code = FLM_NO_ERROR;
+	flmtype_t typeMat = fixedLMGetType(mat);
 
 	fixedLMClearErrno();
-	flmretrieve_t oneVal = getOneValueByType(mat->type);
+	flmretrieve_t oneVal = getOneValueByType(typeMat);
 	code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 	
@@ -53,27 +49,19 @@ FLMErrorCode fixedLMOnes(flmmat_t *mat){
 }
 
 FLMErrorCode fixedLMEye(flmmat_t *mat){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	flmdim_t height, width;
+	HANDLE_RECTANGLE_MATRIX(mat, width, height);
 
-	flmdim_t height = fixedLMGetHeight(mat);
-	flmdim_t width = fixedLMGetWidth(mat);
-
-	if(width != height){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_RECTANGULAR);
-	}
+	flmtype_t typeMat = fixedLMGetType(mat);
 	
 	FLMErrorCode code = FLM_NO_ERROR;
 
 	code = fixedLMFill(mat, 0);
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 
-	flmretrieve_t oneVal = getOneValueByType(mat->type);
+	flmretrieve_t oneVal = getOneValueByType(typeMat);
 	code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 

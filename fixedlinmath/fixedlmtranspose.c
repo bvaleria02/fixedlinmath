@@ -5,22 +5,15 @@
 #include <stdlib.h>
 
 FLMErrorCode fixedLMTransposeDeep(flmmat_t *mat){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
-
-	flmdim_t height = fixedLMGetHeight(mat);
-	flmdim_t width = fixedLMGetWidth(mat);
+	flmdim_t height, width;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
 
 	flmmat_t proxy;
-	proxy.isSet = 0;
 	FLMErrorCode code;
 
-	code = fixedLMCreateMatrix(&proxy, height, width, mat->type, mat->data);
+	code = fixedLMCreateMatrix(&proxy, height, width, fixedLMGetType(mat), mat->data);
 	if(code != FLM_NO_ERROR) FLM_RAISE_RETURN_ERROR(code);
 
 	for(flmdim_t i = 0; i < height; i++){
@@ -51,15 +44,9 @@ FLMErrorCode fixedLMTranspose(flmmat_t *mat){
 }
 
 FLMErrorCode fixedLMTransposeVirtual(flmmat_t *mat){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
-
-	mat->isTransposed = !(mat->isTransposed);
+	fixedLMToggleFlag(mat, FLM_FLAG_TRANSPOSED);
 
 	return FLM_NO_ERROR;
 }

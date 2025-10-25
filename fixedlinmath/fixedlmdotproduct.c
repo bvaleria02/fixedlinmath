@@ -5,10 +5,6 @@
 #include <stdlib.h>
 
 FLMErrorCode fixedLMDotElementWise(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
-	if(m1 == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
-
 	if(m2 == NULL){
 		m2 = m1;
 	}
@@ -17,24 +13,25 @@ FLMErrorCode fixedLMDotElementWise(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 		m3 = m1;
 	}
 
-	if(m1->isSet == FLM_MATRIX_UNSET || m2->isSet == FLM_MATRIX_UNSET || m3->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	HANDLE_INVALID_MATRIX(m1);
+	HANDLE_INVALID_MATRIX(m2);
+	HANDLE_INVALID_MATRIX(m3);
 
-	flmdim_t height1 = fixedLMGetHeight(m1);
-	flmdim_t width1 = fixedLMGetWidth(m1);
-	flmdim_t height2 = fixedLMGetHeight(m2);
-	flmdim_t width2 = fixedLMGetWidth(m2);
-	flmdim_t height3 = fixedLMGetHeight(m3);
-	flmdim_t width3 = fixedLMGetWidth(m3);
+	flmdim_t height1, width1;
+	GET_DIMENSIONS_MATRIX(m1, width1, height1);
 
-	if((width1 != width2) || (width1 != width3)){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmdim_t height2, width2;
+	GET_DIMENSIONS_MATRIX(m2, width2, height2);
 
-	if((height1 != height2) || (height1 != height3)){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmdim_t height3, width3;
+	GET_DIMENSIONS_MATRIX(m3, width3, height3);
+
+	HANDLE_NONMATCHING_MATRIX(width1, height1, width2, height2);
+	HANDLE_NONMATCHING_MATRIX(width1, height1, width3, height3);
+
+	flmtype_t type1 = fixedLMGetType(m1);
+	flmtype_t type2 = fixedLMGetType(m2);
+	flmtype_t type3 = fixedLMGetType(m3);
 
 	FLMErrorCode code;
 	flmretrieve_t temp1;
@@ -45,13 +42,13 @@ FLMErrorCode fixedLMDotElementWise(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 		for(flmdim_t j = 0; j < width1; j++){
 			FLM_CLEAR_ERROR();
 			temp1 = fixedLMRetrieveValue(m1, j, i);
-			temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+			temp1 = typeAbstractValueConverterIn(type1, temp1);
 
 			temp2 = fixedLMRetrieveValue(m2, j, i);
-			temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+			temp2 = typeAbstractValueConverterIn(type2, temp2);
 
 			temp3 = fixedMul64(temp1, temp2);
-			temp3 = typeAbstractValueConverterOut(m3->type, temp3);
+			temp3 = typeAbstractValueConverterOut(type3, temp3);
 			code  = fixedLMSetValue(m3, j, i, temp3);
 			if(code != FLM_NO_ERROR) return code;
 		}
@@ -61,34 +58,26 @@ FLMErrorCode fixedLMDotElementWise(flmmat_t *m1, flmmat_t *m2, flmmat_t *m3){
 }
 
 FLMErrorCode fixedLMDotVectorRow(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t *value){
-	if(m1 == NULL || value == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
-
 	if(m2 == NULL){
 		m2 = m1;
 	}
 
-	if(m1->isSet == FLM_MATRIX_UNSET || m2->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	HANDLE_INVALID_MATRIX(m1);
+	HANDLE_INVALID_MATRIX(m2);
 
-	flmdim_t height1 = fixedLMGetHeight(m1);
-	flmdim_t width1 = fixedLMGetWidth(m1);
-	flmdim_t height2 = fixedLMGetHeight(m2);
-	flmdim_t width2 = fixedLMGetWidth(m2);
+	flmdim_t height1, width1;
+	GET_DIMENSIONS_MATRIX(m1, width1, height1);
 
-	if(width1 != width2){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmdim_t height2, width2;
+	GET_DIMENSIONS_MATRIX(m2, width2, height2);
 
-	if(height1 != height2){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_NONMATCHING_MATRIX(width1, height1, width2, height2);
 
-	if(height1 != 1 || height2 != 1){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);
-	}
+	HANDLE_NONROWVECT_MATRIX(height1);
+	HANDLE_NONROWVECT_MATRIX(height2);
+
+	flmtype_t type1 = fixedLMGetType(m1);
+	flmtype_t type2 = fixedLMGetType(m2);
 
 	FLMErrorCode code;
 	flmretrieve_t temp1;
@@ -100,12 +89,12 @@ FLMErrorCode fixedLMDotVectorRow(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flm
 		FLM_CLEAR_ERROR();
 
 		temp1 = fixedLMRetrieveValue(m1, i, 0);
-		temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+		temp1 = typeAbstractValueConverterIn(type1, temp1);
 		code = fixedLMGetErrno();
 		if(code != FLM_NO_ERROR) return code;
 
 		temp2 = fixedLMRetrieveValue(m2, i, 0);
-		temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+		temp2 = typeAbstractValueConverterIn(type2, temp2);
 		code = fixedLMGetErrno();
 		if(code != FLM_NO_ERROR) return code;
 
@@ -121,30 +110,26 @@ FLMErrorCode fixedLMDotVectorRow(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flm
 }
 
 FLMErrorCode fixedLMDotVectorCol(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flmretrieve_t *value){
-	if(m1 == NULL || value == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
-
 	if(m2 == NULL){
 		m2 = m1;
 	}
 
-	if(m1->isSet == FLM_MATRIX_UNSET || m2->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	HANDLE_INVALID_MATRIX(m1);
+	HANDLE_INVALID_MATRIX(m2);
 
-	flmdim_t height1 = fixedLMGetHeight(m1);
-	flmdim_t width1 = fixedLMGetWidth(m1);
-	flmdim_t height2 = fixedLMGetHeight(m2);
-	flmdim_t width2 = fixedLMGetWidth(m2);
+	flmdim_t height1, width1;
+	GET_DIMENSIONS_MATRIX(m1, width1, height1);
 
-	if(width1 != width2){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmdim_t height2, width2;
+	GET_DIMENSIONS_MATRIX(m2, width2, height2);
 
-	if(height1 != height2){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_NONMATCHING_MATRIX(width1, height1, width2, height2);
+
+	HANDLE_NONCOLVECT_MATRIX(width1);
+	HANDLE_NONCOLVECT_MATRIX(width2);
+
+	flmtype_t type1 = fixedLMGetType(m1);
+	flmtype_t type2 = fixedLMGetType(m2);
 
 	if(width1 != 1 || width2 != 1){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NOTVECTOR);
@@ -160,12 +145,12 @@ FLMErrorCode fixedLMDotVectorCol(flmmat_t *m1, flmmat_t *m2, flmtype_t type, flm
 		FLM_CLEAR_ERROR();
 
 		temp1 = fixedLMRetrieveValue(m1, 0, i);
-		temp1 = typeAbstractValueConverterIn(m1->type, temp1);
+		temp1 = typeAbstractValueConverterIn(type1, temp1);
 		code = fixedLMGetErrno();
 		if(code != FLM_NO_ERROR) return code;
 
 		temp2 = fixedLMRetrieveValue(m2, 0, i);
-		temp2 = typeAbstractValueConverterIn(m2->type, temp2);
+		temp2 = typeAbstractValueConverterIn(type2, temp2);
 		code = fixedLMGetErrno();
 		if(code != FLM_NO_ERROR) return code;
 

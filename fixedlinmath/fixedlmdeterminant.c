@@ -63,12 +63,14 @@ FLMErrorCode fixedLMDeterminant1x1(flmmat_t *a, flmtype_t type, flmretrieve_t *v
 	flmdim_t widthA, heightA;
 	HANDLE_RECTANGLE_MATRIX(a, widthA, heightA);
 
+	flmtype_t typeA = fixedLMGetType(a);
+
 	if(widthA < 1){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
 
 	flmretrieve_t temp = fixedLMRetrieveValue(a, 0, 0);
-	temp = typeAbstractValueConverterIn(a->type, temp);
+	temp = typeAbstractValueConverterIn(typeA, temp);
 	FLMErrorCode code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) return code;
 
@@ -87,6 +89,8 @@ FLMErrorCode fixedLMDeterminant2x2(flmmat_t *a, flmtype_t type, flmretrieve_t *v
 	flmdim_t widthA, heightA;
 	HANDLE_RECTANGLE_MATRIX(a, widthA, heightA);
 
+	flmtype_t typeA = fixedLMGetType(a);
+
 	if(widthA < 2){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
@@ -99,16 +103,16 @@ FLMErrorCode fixedLMDeterminant2x2(flmmat_t *a, flmtype_t type, flmretrieve_t *v
 	FLM_CLEAR_ERROR();
 
 	flmretrieve_t A = fixedLMRetrieveValue(a, 0, 0);
-	A = typeAbstractValueConverterIn(a->type, A);
+	A = typeAbstractValueConverterIn(typeA, A);
 
 	flmretrieve_t B = fixedLMRetrieveValue(a, 1, 0);
-	B = typeAbstractValueConverterIn(a->type, B);
+	B = typeAbstractValueConverterIn(typeA, B);
 
 	flmretrieve_t C = fixedLMRetrieveValue(a, 0, 1);
-	C = typeAbstractValueConverterIn(a->type, C);
+	C = typeAbstractValueConverterIn(typeA, C);
 
 	flmretrieve_t D = fixedLMRetrieveValue(a, 1, 1);
-	D = typeAbstractValueConverterIn(a->type, D);
+	D = typeAbstractValueConverterIn(typeA, D);
 	FLMErrorCode code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) return code;
 
@@ -131,6 +135,8 @@ FLMErrorCode fixedLMDeterminant3x3(flmmat_t *a, flmtype_t type, flmretrieve_t *v
 	flmdim_t widthA, heightA;
 	HANDLE_RECTANGLE_MATRIX(a, widthA, heightA);
 
+	flmtype_t typeA = fixedLMGetType(a);
+
 	if(widthA < 3){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
 	}
@@ -146,31 +152,31 @@ FLMErrorCode fixedLMDeterminant3x3(flmmat_t *a, flmtype_t type, flmretrieve_t *v
 	FLM_CLEAR_ERROR();
 
 	flmretrieve_t A = fixedLMRetrieveValue(a, 0, 0);
-	A = typeAbstractValueConverterIn(a->type, A);
+	A = typeAbstractValueConverterIn(typeA, A);
 
 	flmretrieve_t B = fixedLMRetrieveValue(a, 1, 0);
-	B = typeAbstractValueConverterIn(a->type, B);
+	B = typeAbstractValueConverterIn(typeA, B);
 
 	flmretrieve_t C = fixedLMRetrieveValue(a, 2, 0);
-	C = typeAbstractValueConverterIn(a->type, C);
+	C = typeAbstractValueConverterIn(typeA, C);
 
 	flmretrieve_t D = fixedLMRetrieveValue(a, 0, 1);
-	D = typeAbstractValueConverterIn(a->type, D);
+	D = typeAbstractValueConverterIn(typeA, D);
 
 	flmretrieve_t E = fixedLMRetrieveValue(a, 1, 1);
-	E = typeAbstractValueConverterIn(a->type, E);
+	E = typeAbstractValueConverterIn(typeA, E);
 
 	flmretrieve_t F = fixedLMRetrieveValue(a, 2, 1);
-	F = typeAbstractValueConverterIn(a->type, F);
+	F = typeAbstractValueConverterIn(typeA, F);
 
 	flmretrieve_t G = fixedLMRetrieveValue(a, 0, 2);
-	G = typeAbstractValueConverterIn(a->type, G);
+	G = typeAbstractValueConverterIn(typeA, G);
 
 	flmretrieve_t H = fixedLMRetrieveValue(a, 1, 2);
-	H = typeAbstractValueConverterIn(a->type, H);
+	H = typeAbstractValueConverterIn(typeA, H);
 
 	flmretrieve_t I = fixedLMRetrieveValue(a, 2, 2);
-	I = typeAbstractValueConverterIn(a->type, I);
+	I = typeAbstractValueConverterIn(typeA, I);
 
 	FLMErrorCode code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) return code;
@@ -219,6 +225,9 @@ FLMErrorCode fixedLMDeterminantLU(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmtype
 	HANDLE_NONMATCHING_MATRIX(widthA, heightA, widthL, heightL);
 	HANDLE_NONMATCHING_MATRIX(widthA, heightA, widthU, heightU);
 
+	flmtype_t typeA = fixedLMGetType(a);
+	flmtype_t typeU = fixedLMGetType(u);
+
 	FLMErrorCode code = fixedLMLUDecomposition(a, l, u);
 	if(code != FLM_NO_ERROR) return code;
 
@@ -227,13 +236,14 @@ FLMErrorCode fixedLMDeterminantLU(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmtype
 
 	for(flmdim_t i = 0; i < widthU; i++){
 		temp = fixedLMRetrieveValue(u, i, i);
-		temp = typeAbstractValueConverterIn(u->type, temp);
+		temp = typeAbstractValueConverterIn(typeU, temp);
 		acc  = fixedMul64(acc, temp);
 	}
 
 	acc = typeAbstractValueConverterOut(type, acc);
 	(*value) = acc;
 
+	(void) typeA;
 	return FLM_NO_ERROR;
 }
 
@@ -246,6 +256,8 @@ FLMErrorCode fixedLMDeterminant4x4(flmmat_t *a, flmtype_t type, flmretrieve_t *v
 
 	flmdim_t widthA, heightA;
 	HANDLE_RECTANGLE_MATRIX(a, widthA, heightA);
+
+	flmtype_t typeA = fixedLMGetType(a);
 
 	if(widthA < 4){
 		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
@@ -264,52 +276,52 @@ FLMErrorCode fixedLMDeterminant4x4(flmmat_t *a, flmtype_t type, flmretrieve_t *v
 	FLM_CLEAR_ERROR();
 
 	flmretrieve_t A = fixedLMRetrieveValue(a, 0, 0);
-	A = typeAbstractValueConverterIn(a->type, A);
+	A = typeAbstractValueConverterIn(typeA, A);
 
 	flmretrieve_t B = fixedLMRetrieveValue(a, 1, 0);
-	B = typeAbstractValueConverterIn(a->type, B);
+	B = typeAbstractValueConverterIn(typeA, B);
 
 	flmretrieve_t C = fixedLMRetrieveValue(a, 2, 0);
-	C = typeAbstractValueConverterIn(a->type, C);
+	C = typeAbstractValueConverterIn(typeA, C);
 
 	flmretrieve_t D = fixedLMRetrieveValue(a, 3, 0);
-	D = typeAbstractValueConverterIn(a->type, D);
+	D = typeAbstractValueConverterIn(typeA, D);
 
 	flmretrieve_t E = fixedLMRetrieveValue(a, 0, 1);
-	E = typeAbstractValueConverterIn(a->type, E);
+	E = typeAbstractValueConverterIn(typeA, E);
 
 	flmretrieve_t F = fixedLMRetrieveValue(a, 1, 1);
-	F = typeAbstractValueConverterIn(a->type, F);
+	F = typeAbstractValueConverterIn(typeA, F);
 
 	flmretrieve_t G = fixedLMRetrieveValue(a, 2, 1);
-	G = typeAbstractValueConverterIn(a->type, G);
+	G = typeAbstractValueConverterIn(typeA, G);
 
 	flmretrieve_t H = fixedLMRetrieveValue(a, 3, 1);
-	H = typeAbstractValueConverterIn(a->type, H);
+	H = typeAbstractValueConverterIn(typeA, H);
 
 	flmretrieve_t I = fixedLMRetrieveValue(a, 0, 2);
-	I = typeAbstractValueConverterIn(a->type, I);
+	I = typeAbstractValueConverterIn(typeA, I);
 
 	flmretrieve_t J = fixedLMRetrieveValue(a, 1, 2);
-	J = typeAbstractValueConverterIn(a->type, J);
+	J = typeAbstractValueConverterIn(typeA, J);
 
 	flmretrieve_t K = fixedLMRetrieveValue(a, 2, 2);
-	K = typeAbstractValueConverterIn(a->type, K);
+	K = typeAbstractValueConverterIn(typeA, K);
 
 	flmretrieve_t L = fixedLMRetrieveValue(a, 3, 2);
-	L = typeAbstractValueConverterIn(a->type, L);
+	L = typeAbstractValueConverterIn(typeA, L);
 
 	flmretrieve_t M = fixedLMRetrieveValue(a, 0, 3);
-	M = typeAbstractValueConverterIn(a->type, M);
+	M = typeAbstractValueConverterIn(typeA, M);
 
 	flmretrieve_t N = fixedLMRetrieveValue(a, 1, 3);
-	N = typeAbstractValueConverterIn(a->type, N);
+	N = typeAbstractValueConverterIn(typeA, N);
 
 	flmretrieve_t O = fixedLMRetrieveValue(a, 2, 3);
-	O = typeAbstractValueConverterIn(a->type, O);
+	O = typeAbstractValueConverterIn(typeA, O);
 
 	flmretrieve_t P = fixedLMRetrieveValue(a, 3, 3);
-	P = typeAbstractValueConverterIn(a->type, P);
+	P = typeAbstractValueConverterIn(typeA, P);
 
 	FLMErrorCode code = fixedLMGetErrno();
 	if(code != FLM_NO_ERROR) return code;

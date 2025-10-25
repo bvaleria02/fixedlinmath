@@ -92,12 +92,10 @@ flmretrieve_t getReciprocalByType(flmtype_t type, flmretrieve_t x){
 }
 
 flmdim_t getNonZeroRowFromColumnIndex(flmmat_t *mat, flmdim_t col, flmdim_t row){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_ERROR_VALUE);
-	}
+	HANDLE_NULL_MATRIX_FLAG(mat);
 
-	flmdim_t height = fixedLMGetHeight(mat);
-	flmdim_t width = fixedLMGetWidth(mat);
+	flmdim_t height, width;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
 
 	if(col >= width){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_DIMENSION, FLM_ERROR_VALUE);
@@ -124,24 +122,20 @@ flmdim_t getNonZeroRowFromColumn(flmmat_t *mat, flmdim_t col){
 }
 
 flmflag_t fixedLMIsMatrixNotEye(flmmat_t *mat){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_FLAG_NOTEYE);
-	}
+	HANDLE_NULL_MATRIX_FLAG(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_MATRIXUNSET, FLM_FLAG_NOTEYE);
-	}
-
-	flmdim_t height = fixedLMGetHeight(mat);
-	flmdim_t width = fixedLMGetWidth(mat);
+	flmdim_t height, width;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
 
 	if(width != height){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_RECTANGULAR, FLM_FLAG_NOTEYE);
 	}
 
+	flmtype_t typeMat = fixedLMGetType(mat);
+
 	flmretrieve_t temp1;
-	flmretrieve_t one  = getOneValueByType(mat->type);
-	flmretrieve_t zero = getZeroValueByType(mat->type);
+	flmretrieve_t one  = getOneValueByType(typeMat);
+	flmretrieve_t zero = getZeroValueByType(typeMat);
 
 	for(flmdim_t i = 0; i < height; i++){
 		for(flmdim_t j = 0; j < width; j++){

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 //#include "fixedlmprint.h"
 
-void createLComponents(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmdim_t col, flmdim_t width, flmretrieve_t one){
+FLMErrorCode createLComponents(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmdim_t col, flmdim_t width, flmretrieve_t one){
 
 	flmretrieve_t a_mn;
 	flmretrieve_t l_mk;
@@ -14,12 +14,23 @@ void createLComponents(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmdim_t col, flmd
 	flmretrieve_t acc;
 	flmretrieve_t acc2;
 
+	flmtype_t typeA = fixedLMGetType(a);
+	flmtype_t typeL = fixedLMGetType(l);
+	flmtype_t typeU = fixedLMGetType(u);
+
+	FLMErrorCode code;
+
 	for(flmdim_t row = col; row < width; row++){
+
+		FLM_CLEAR_ERROR();
+
 		if(row == col){
-			fixedLMSetValue(l, col, row, one);
+			code = fixedLMSetValue(l, col, row, one);
+			if(code != FLM_NO_ERROR) return code;
 			continue;
 		} else if (row < col){
-			fixedLMSetValue(l, col, row, 0x0);
+			code = fixedLMSetValue(l, col, row, 0x0);
+			if(code != FLM_NO_ERROR) return code;
 			continue;
 		}
 		
@@ -27,17 +38,18 @@ void createLComponents(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmdim_t col, flmd
 		// m = row	n = col
 
 		a_mn = fixedLMRetrieveValue(a, col, row);
-		a_mn = typeAbstractValueConverterIn(a->type, a_mn);
+		a_mn = typeAbstractValueConverterIn(typeA, a_mn);
 
 		u_nn = fixedLMRetrieveValue(u, col, col);
-		u_nn = getReciprocalByType(u->type, u_nn);
-		u_nn = typeAbstractValueConverterIn(u->type, u_nn);
+		u_nn = getReciprocalByType(typeU, u_nn);
+		u_nn = typeAbstractValueConverterIn(typeU, u_nn);
 
 		// Special case: if l_m0, l_m0 = a_mn/u_nn
 		if(col == 0){
 			acc = fixedMul64(a_mn, u_nn);
-			acc = typeAbstractValueConverterOut(l->type, acc);
-			fixedLMSetValue(l, col, row, acc);
+			acc = typeAbstractValueConverterOut(typeL, acc);
+			code = fixedLMSetValue(l, col, row, acc);
+			if(code != FLM_NO_ERROR) return code;
 			continue;
 		}
 
@@ -45,24 +57,26 @@ void createLComponents(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmdim_t col, flmd
 
 		for(flmdim_t k = 0; k < col; k++){
 			l_mk = fixedLMRetrieveValue(l, k, row);
-			l_mk = typeAbstractValueConverterIn(l->type, l_mk);
+			l_mk = typeAbstractValueConverterIn(typeL, l_mk);
 
 			u_kn = fixedLMRetrieveValue(u, col, k);
-			u_kn = typeAbstractValueConverterIn(u->type, u_kn);
+			u_kn = typeAbstractValueConverterIn(typeU, u_kn);
 			
 			acc2 = fixedMul64(l_mk, u_kn);
 			acc  = fixedSub64(acc, acc2);
 		}
 		
 		acc = fixedMul64(acc, u_nn);
-		acc = typeAbstractValueConverterOut(l->type, acc);
-		fixedLMSetValue(l, col, row, acc);
+		acc = typeAbstractValueConverterOut(typeL, acc);
+		code = fixedLMSetValue(l, col, row, acc);
+		if(code != FLM_NO_ERROR) return code;
 	}
 
 	(void) width;
+	return FLM_NO_ERROR;
 }
 
-void createUComponents(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmdim_t row, flmdim_t width){
+FLMErrorCode createUComponents(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmdim_t row, flmdim_t width){
 
 	flmretrieve_t a_mn;
 	flmretrieve_t l_mk;
@@ -70,39 +84,49 @@ void createUComponents(flmmat_t *a, flmmat_t *l, flmmat_t *u, flmdim_t row, flmd
 	flmretrieve_t acc;
 	flmretrieve_t acc2;
 
+	flmtype_t typeA = fixedLMGetType(a);
+	flmtype_t typeL = fixedLMGetType(l);
+	flmtype_t typeU = fixedLMGetType(u);
+
+	FLMErrorCode code;
+
 	for(flmdim_t col = row; col < width; col++){
 		if(col < row){
-			fixedLMSetValue(l, col, row, 0x0);
+			code = fixedLMSetValue(l, col, row, 0x0);
+			if(code != FLM_NO_ERROR) return code;
 			continue;
 		}
 
 		// a_{m,n} - sum from k=1 to {m-1} l_{m,k} cdot u_{k,n}
 		
 		a_mn = fixedLMRetrieveValue(a, col, row);
-		a_mn = typeAbstractValueConverterIn(a->type, a_mn);
+		a_mn = typeAbstractValueConverterIn(typeA, a_mn);
 
 		// Special case: row = 0, u_0n = a_0n
 		if(row == 0){
-			acc = typeAbstractValueConverterOut(u->type, a_mn);
-			fixedLMSetValue(u, col, row, acc);
+			acc = typeAbstractValueConverterOut(typeU, a_mn);
+			code = fixedLMSetValue(u, col, row, acc);
+			if(code != FLM_NO_ERROR) return code;
 			continue;
 		}
 
 		acc = a_mn;
 		for(flmdim_t k = 0; k < row; k++){
 			l_mk = fixedLMRetrieveValue(l, k, row);
-			l_mk = typeAbstractValueConverterIn(l->type, l_mk);
+			l_mk = typeAbstractValueConverterIn(typeL, l_mk);
 
 			u_kn = fixedLMRetrieveValue(u, col, k);
-			u_kn = typeAbstractValueConverterIn(u->type, u_kn);
+			u_kn = typeAbstractValueConverterIn(typeU, u_kn);
 			
 			acc2 = fixedMul64(l_mk, u_kn);
 			acc  = fixedSub64(acc, acc2);
 		}
 		
-		acc = typeAbstractValueConverterOut(u->type, acc);
-		fixedLMSetValue(u, col, row, acc);
+		acc = typeAbstractValueConverterOut(typeU, acc);
+		code =fixedLMSetValue(u, col, row, acc);
+		if(code != FLM_NO_ERROR) return code;
 	}
+	return FLM_NO_ERROR;
 }
 
 
@@ -123,16 +147,22 @@ FLMErrorCode fixedLMLUDecomposition(flmmat_t *a, flmmat_t *l, flmmat_t *u){
 	HANDLE_NONMATCHING_MATRIX(widthA, heightA, widthL, heightL);
 	HANDLE_NONMATCHING_MATRIX(widthA, heightA, widthU, heightU);
 
-	flmretrieve_t oneL = getOneValueByType(l->type);
+	flmtype_t typeL = fixedLMGetType(l);
+
+	flmretrieve_t oneL = getOneValueByType(typeL);
 	fixedLMZeros(l);
 	fixedLMZeros(u);
+
+	FLMErrorCode code;
 	
 	for(flmdim_t i = 0; i < widthA; i++){
-		createUComponents(a, l, u, i, widthA);
+		code = createUComponents(a, l, u, i, widthA);
+		if(code != FLM_NO_ERROR) return code;
 	//	printf("U: %i\n", i);
 	//	fixedLMPrintMatrix(u);
 
-		createLComponents(a, l, u, i, widthA, oneL);
+		code = createLComponents(a, l, u, i, widthA, oneL);
+		if(code != FLM_NO_ERROR) return code;
 	//	printf("L: %i\n", i);
 	//	fixedLMPrintMatrix(l);
 	}

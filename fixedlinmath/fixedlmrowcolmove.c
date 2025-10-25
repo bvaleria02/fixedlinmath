@@ -5,24 +5,13 @@
 #include <stdlib.h>
 
 FLMErrorCode fixedLMRowSwap(flmmat_t *mat, flmdim_t rowSrc, flmdim_t rowDest){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	flmdim_t height, width;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
 
-	flmdim_t height = fixedLMGetHeight(mat);
-	flmdim_t width = fixedLMGetWidth(mat);
-
-	if(rowSrc >= height){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
-
-	if(rowDest >= height){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_DIMENSIONS_MATRIX(height, rowSrc);
+	HANDLE_DIMENSIONS_MATRIX(height, rowDest);
 
 	FLMErrorCode 	code;
 	flmretrieve_t 	temp1;
@@ -31,40 +20,29 @@ FLMErrorCode fixedLMRowSwap(flmmat_t *mat, flmdim_t rowSrc, flmdim_t rowDest){
 	for(flmdim_t i = 0; i < width; i++){
 		temp1 = fixedLMRetrieveValue(mat, i, rowSrc );
 		code  = fixedLMGetErrno();
-		if(code != FLM_NO_ERROR)	FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
+		if(code != FLM_NO_ERROR)	return code;
 
 		temp2 = fixedLMRetrieveValue(mat, i, rowDest);
 		code  = fixedLMGetErrno();
-		if(code != FLM_NO_ERROR)	FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
+		if(code != FLM_NO_ERROR)	return code;
 		
 		code = fixedLMSetValue(mat, i, rowSrc, temp2);
-		if(code != FLM_NO_ERROR)	FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
+		if(code != FLM_NO_ERROR)	return code;
 		code = fixedLMSetValue(mat, i, rowDest, temp1);
-		if(code != FLM_NO_ERROR)	FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
+		if(code != FLM_NO_ERROR)	return code;
 	}
 
 	return FLM_NO_ERROR;
 }
 
 FLMErrorCode fixedLMColSwap(flmmat_t *mat, flmdim_t colSrc, flmdim_t colDest){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	flmdim_t height, width;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
 
-	flmdim_t height = fixedLMGetHeight(mat);
-	flmdim_t width = fixedLMGetWidth(mat);
-
-	if(colSrc >= width){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
-
-	if(colDest >= width){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_DIMENSIONS_MATRIX(width, colSrc);
+	HANDLE_DIMENSIONS_MATRIX(width, colDest);
 
 	FLMErrorCode 	code;
 	flmretrieve_t 	temp1;
@@ -89,30 +67,23 @@ FLMErrorCode fixedLMColSwap(flmmat_t *mat, flmdim_t colSrc, flmdim_t colDest){
 }
 
 FLMErrorCode fixedLMValueSwap(flmmat_t *matSrc, flmmat_t *matDest, flmdim_t colSrc, flmdim_t rowSrc, flmdim_t colDest, flmdim_t rowDest){
-	if(matSrc == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
-
 	if(matDest == NULL){
 		matDest = matSrc;
 	}
 
-	flmdim_t heightSrc = fixedLMGetHeight(matSrc);
-	flmdim_t widthSrc = fixedLMGetWidth(matSrc);
-	flmdim_t heightDest = fixedLMGetHeight(matDest);
-	flmdim_t widthDest = fixedLMGetWidth(matDest);
+	HANDLE_INVALID_MATRIX(matSrc);
+	HANDLE_INVALID_MATRIX(matDest);
 
-	if(matSrc->isSet == FLM_MATRIX_UNSET || matDest->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	flmdim_t heightSrc, widthSrc;
+	GET_DIMENSIONS_MATRIX(matSrc, widthSrc, heightSrc);
 
-	if(colSrc >= widthSrc || colDest >= widthDest){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	flmdim_t heightDest, widthDest;
+	GET_DIMENSIONS_MATRIX(matDest, widthDest, heightDest);
 
-	if(rowSrc >= heightSrc || rowDest >= heightDest){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_DIMENSIONS_MATRIX(widthSrc,   colSrc);
+	HANDLE_DIMENSIONS_MATRIX(widthDest,  colDest);
+	HANDLE_DIMENSIONS_MATRIX(heightSrc,  rowSrc);
+	HANDLE_DIMENSIONS_MATRIX(heightDest, rowDest);
 
 	FLMErrorCode 	code;
 	flmretrieve_t 	temp1;

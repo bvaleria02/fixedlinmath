@@ -128,7 +128,7 @@ void matmul_test(){
 	fixedLMPrintError();
 	FLM_CLEAR_ERROR();
 
-	fixedLMColAddWeighted(&m3, 0, 4, FIXED32_T, 0x40000);
+	fixedLMColAddWeighted(&m3, 0, 1, FIXED32_T, 0x40000);
 	fixedLMPrintError();
 	FLM_CLEAR_ERROR();
 	fixedLMPrintMatrix(&m3);
@@ -167,7 +167,6 @@ void gaussJordan(){
 	fixedLMPrintMatrix(&m1);
 	fixedLMPrintMatrix(&m2);
 
-	fixedLMDestroyMatrix(&m1);
 	fixedLMPrintError();
 	FLM_CLEAR_ERROR();
 
@@ -187,6 +186,8 @@ void gaussJordan(){
 	fixedLMPrintMatrix(&m2);
 	fixedLMPrintError();
 
+	fixedLMDestroyMatrix(&m1);
+	fixedLMDestroyMatrix(&m2);
 }
 	
 void dotCrossProduct(){
@@ -203,12 +204,12 @@ void dotCrossProduct(){
 	fixedLMZeros(&v2);
 	fixedLMZeros(&v3);
 
-	v2.isTransposed = 1;
+	fixedLMSetFlag(&v2, FLM_FLAG_TRANSPOSED);
 	fixedLMSetValue(&v1, 0, 0, 0x40000);	//  4.0
 	fixedLMSetValue(&v1, 0, 2, 0x20000);	//  2.0
 	fixedLMSetValue(&v2, 0, 0, 0xA0000);	// 10.0
 	fixedLMSetValue(&v2, 1, 0, 0x78000);	//  7.5
-	v2.isTransposed = 0;
+	fixedLMClearFlag(&v2, FLM_FLAG_TRANSPOSED);
 	fixedLMPrintError();
 
 	flmretrieve_t dot = 0;
@@ -216,6 +217,7 @@ void dotCrossProduct(){
 	printf("Dot product: %lf\n", convertF32ToDouble(dot));
 
 	fixedLMCrossCol3d(&v1, &v2, &v3);
+	fixedLMPrintError();
 
 	fixedLMPrintMatrix(&v1);
 	fixedLMPrintMatrix(&v2);
@@ -236,7 +238,11 @@ void virtualTranspose(){
 	}
 
 	fixedLMPrintMatrix(&m4);
+
 	fixedLMTransposeVirtual(&m4);
+	fixedLMPrintError();
+	fixedLMPrintMatrix(&m4);
+
 	fixedLMRowSwap(&m4, 0, 1);
 	fixedLMPrintError();
 	fixedLMPrintMatrix(&m4);
@@ -276,21 +282,23 @@ void LUDecomp(){
 	fixedLMPrintError();
 	fixedLMPrintMatrix(&a);
 
+	fixedLMSetFlag(&u, FLM_FLAG_READONLY);
+
 	flmretrieve_t det4x4;
 	flmretrieve_t detLU;
 	fixedLMDeterminantLU(&a, &l, &u, FIXED64_T, &detLU);
+	fixedLMPrintError();
 	fixedLMDeterminant4x4(&a, FIXED64_T, &det4x4);
+	fixedLMPrintError();
 	printf("Det 4x4: %lf\n", convertF64ToDouble(det4x4));
 	printf("Det LU: %lf\n", convertF64ToDouble(detLU));
 }
 
 int main(){
-	/*
-	creationAndBasiOperations();
-	basic_arithmetic();
-	*/
-//	matmul_test();
-//	gaussJordan();
+	//creationAndBasiOperations();
+	//basic_arithmetic();
+	//matmul_test();
+	//gaussJordan();
 
 	//dotCrossProduct();
 	//virtualTranspose();

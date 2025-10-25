@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 static inline uint32_t getElementMatrix(flmmat_t *mat, flmdim_t col,flmdim_t row){
-	if(mat->isTransposed == FLM_MATRIX_TRANSPOSED){
+	if(fixedLMIsTransposed(mat)){
 		return (col * mat->width) + row;
 	}
 	return (row * mat->width) + col;
@@ -16,7 +16,7 @@ flmdim_t fixedLMGetWidth(flmmat_t *mat){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_DIM_ERROR);
 	}
 
-	if(mat->isTransposed == FLM_MATRIX_TRANSPOSED){
+	if(fixedLMIsTransposed(mat)){
 		return mat->height;
 	}
 
@@ -28,7 +28,7 @@ flmdim_t fixedLMGetHeight(flmmat_t *mat){
 		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_DIM_ERROR);
 	}
 
-	if(mat->isTransposed == FLM_MATRIX_TRANSPOSED){
+	if(fixedLMIsTransposed(mat)){
 		return mat->width;
 	}
 
@@ -37,27 +37,21 @@ flmdim_t fixedLMGetHeight(flmmat_t *mat){
 
 
 flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t col, flmdim_t row){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_NULLPTR, FLM_ERROR_VALUE);
-	}
+	HANDLE_INVALID_MATRIX(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_MATRIXUNSET, FLM_ERROR_VALUE);
-	}
+	flmdim_t width, height;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
 
-	if(col >= fixedLMGetWidth(mat)){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_DIMENSION, FLM_ERROR_VALUE);
-	}
+	HANDLE_DIMENSIONS_MATRIX(width,  col);
+	HANDLE_DIMENSIONS_MATRIX(height, row);
 
-	if(row >= fixedLMGetHeight(mat)){
-		FLM_RAISE_RETURN_VALUE(FLM_ERROR_DIMENSION, FLM_ERROR_VALUE);
-	}
+	flmtype_t typeMat = fixedLMGetType(mat);
 
 	uint32_t element = getElementMatrix(mat, col, row);
 	flmretrieve_t value = 0;
 	//printf("trans: %i\tcol: %i\trow: %i\tIndex: %i\n", mat->isTransposed, col, row, element);
 
-	FLM_TYPE_EXEC(mat->type, {
+	FLM_TYPE_EXEC(typeMat, {
 		value = ((flmdtype_t *)mat->data)[element];
 	}, {
 		value = FLM_ERROR_VALUE;	
@@ -67,25 +61,23 @@ flmretrieve_t fixedLMRetrieveValue(flmmat_t *mat, flmdim_t col, flmdim_t row){
 }
 
 FLMErrorCode fixedLMSetValue(flmmat_t *mat, flmdim_t col, flmdim_t row, flmretrieve_t value){
-	if(mat == NULL){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_NULLPTR);
-	}
+	HANDLE_INVALID_MATRIX(mat);
 
-	if(mat->isSet == FLM_MATRIX_UNSET){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_MATRIXUNSET);
-	}
+	flmdim_t width, height;
+	GET_DIMENSIONS_MATRIX(mat, width, height);
 
-	if(col >= fixedLMGetWidth(mat)){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
-	}
+	HANDLE_DIMENSIONS_MATRIX(width,  col);
+	HANDLE_DIMENSIONS_MATRIX(height, row);
 
-	if(row >= fixedLMGetHeight(mat)){
-		FLM_RAISE_RETURN_ERROR(FLM_ERROR_DIMENSION);
+	flmtype_t typeMat = fixedLMGetType(mat);
+
+	if(fixedLMIsReadOnly(mat)){
+		FLM_RAISE_RETURN_ERROR(FLM_ERROR_READONLY);
 	}
 
 	uint32_t element = getElementMatrix(mat, col, row);
 
-	FLM_TYPE_EXEC(mat->type, {
+	FLM_TYPE_EXEC(typeMat, {
 		((flmdtype_t *)mat->data)[element] = (flmdtype_t)value;
 	}, {
 		return FLM_ERROR_TYPE;
